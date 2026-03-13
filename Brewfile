@@ -15,6 +15,9 @@ brew "ripgrep"    # grep replacement, blazing fast
 brew "zoxide"     # cd replacement with frecency-based directory jumping
 brew "git-delta"  # Better git diffs with syntax highlighting
 
+# Prompt theme
+brew "powerlevel10k"            # Feature-rich zsh prompt with instant prompt support
+
 # Zsh plugins
 brew "zsh-syntax-highlighting"  # Colors commands as you type
 brew "zsh-autosuggestions"      # Ghost-text completions from history

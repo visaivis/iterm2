@@ -29,7 +29,8 @@ flowchart TD
     P --> Q[Symlink ~/.tmux.conf]
     Q --> R[Install TPM]
     R --> S[Add delta include to ~/.gitconfig]
-    S --> T[Print summary]
+    S --> T[Verify Powerlevel10k<br/>detect existing ~/.p10k.zsh]
+    T --> U[Print summary]
 ```
 
 ## Uninstall Flow
@@ -62,7 +63,8 @@ flowchart LR
     C --> D[plugins.zsh<br/>compinit, fzf-tab,<br/>autosuggestions,<br/>syntax-highlighting]
     C --> E[fzf.zsh<br/>keybindings,<br/>theme colors]
     C --> F[aliases.zsh<br/>eza, bat, fd,<br/>rg, zoxide]
-    C --> G[p10k-overlay.zsh<br/>transient prompt,<br/>color overrides]
+    C --> G0["init.zsh sources p10k<br/>(if not already loaded)"]
+    G0 --> G[p10k-overlay.zsh<br/>transient prompt,<br/>color overrides]
     C --> H[tmux.zsh<br/>aliases,<br/>ai-workspace]
     C --> I[iterm2-integration.zsh<br/>shell marks]
 ```

@@ -26,8 +26,16 @@ Closes #<!-- issue number -->
 - [ ] `bash install.sh --dry-run` succeeds
 - [ ] `bash test.sh` passes in sandbox
 
-## Checklist
+## Documentation
 
 - [ ] Updated `CHANGELOG.md` under `[Unreleased]`
-- [ ] Updated docs if behavior changed
+- [ ] Updated `README.md` if user-facing behavior changed
+- [ ] Updated `docs/architecture.md` if install/uninstall flow changed
+- [ ] Updated `docs/features.md` if feature behavior changed
+- [ ] Updated `AGENTS.md` if project structure or conventions changed
+- [ ] Updated `.github/skills/sdlc-agent.md` if workflow or file scope changed
+- [ ] N/A — no documentation changes needed (explain why)
+
+## Checklist
+
 - [ ] No secrets or personal paths committed

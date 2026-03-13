@@ -313,6 +313,7 @@ $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Append source line to: ${DIM}$ZSHRC$
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Symlink tmux config: ${DIM}~/.tmux.conf → $SCRIPT_DIR/config/tmux/tmux.conf${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Install TPM (Tmux Plugin Manager)"
 $SKIP_GIT    || echo -e "  ${GREEN}▸${NC} Git delta config: ${DIM}~/.modern-terminal/git/delta.gitconfig${NC}"
+$SKIP_P10K   || echo -e "  ${GREEN}▸${NC} Set up Powerlevel10k prompt theme"
 echo -e "  ${GREEN}▸${NC} Backups saved to: ${DIM}$BACKUP_DIR${NC}"
 echo ""
 
@@ -522,6 +523,45 @@ if ! $SKIP_GIT; then
 fi
 
 # =============================================================================
+# 6. Powerlevel10k Setup
+# =============================================================================
+
+if ! $SKIP_P10K; then
+  header "Setting up Powerlevel10k"
+
+  P10K_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
+  P10K_THEME="${P10K_BREW_PREFIX}/share/powerlevel10k/powerlevel10k.zsh-theme"
+
+  if [[ ! -f "$P10K_THEME" ]]; then
+    warn "Powerlevel10k not found at $P10K_THEME"
+    warn "It should have been installed via Homebrew. Try: brew install powerlevel10k"
+  else
+    ok "Powerlevel10k installed"
+    log_action "P10K_FOUND $P10K_THEME"
+
+    P10K_CONFIG="$HOME/.p10k.zsh"
+    if [[ -f "$P10K_CONFIG" ]]; then
+      ok "Existing p10k config found: ~/.p10k.zsh"
+      if $DRY_RUN; then
+        info "Your existing p10k configuration will be preserved."
+        info "The overlay (p10k-overlay.zsh) will add theme-matched enhancements."
+      else
+        info "Your existing p10k configuration has been preserved."
+        info "The overlay adds transient prompt and theme-matched colors on top."
+        info "Use ${DIM}--skip-p10k${NC} to disable the overlay if you prefer your original look."
+      fi
+    else
+      if $DRY_RUN; then
+        info "No ~/.p10k.zsh found. After install, run: ${BOLD}p10k configure${NC}"
+      else
+        info "No ~/.p10k.zsh found."
+        info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
+      fi
+    fi
+  fi
+fi
+
+# =============================================================================
 # Summary
 # =============================================================================
 
@@ -531,14 +571,19 @@ if $DRY_RUN; then
   info "This was a dry run. No changes were made."
   info "Run without --dry-run to apply changes."
 else
+  P10K_NEXT=""
+  if ! $SKIP_P10K && [[ ! -f "$HOME/.p10k.zsh" ]]; then
+    P10K_NEXT="\n  ${BOLD}2.${NC} Configure your prompt: ${DIM}p10k configure${NC}"
+  fi
+
   echo -e "
   ${GREEN}${BOLD}What's next:${NC}
 
-  ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})
-  ${BOLD}2.${NC} In iTerm2, switch to the ${DIM}Modern Dark${NC} profile:
+  ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})${P10K_NEXT}
+  ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Modern Dark${NC} profile:
      Settings → Profiles → select 'Modern Dark' → set as Default
-  ${BOLD}3.${NC} Install tmux plugins: open tmux, then press ${DIM}Ctrl+a I${NC}
-  ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
+  ${BOLD}4.${NC} Install tmux plugins (inside tmux): press ${DIM}Ctrl+a I${NC}
+  ${BOLD}5.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
 
   ${BOLD}Backups:${NC} $BACKUP_DIR
   ${BOLD}Manifest:${NC} $MANIFEST
