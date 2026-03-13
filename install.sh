@@ -236,8 +236,8 @@ fi
 
 # tmux conflicts
 if ! $SKIP_TMUX && [[ -f "$HOME/.tmux.conf" ]]; then
-  CONFLICTS+=("existing ~/.tmux.conf")
-  CONFLICT_FILES+=("~/.tmux.conf")
+  CONFLICTS+=("existing $HOME/.tmux.conf")
+  CONFLICT_FILES+=("$HOME/.tmux.conf")
   CONFLICT_ACTIONS+=("backup + replace (original saved)")
 
   # Check for specific conflicts
@@ -245,14 +245,14 @@ if ! $SKIP_TMUX && [[ -f "$HOME/.tmux.conf" ]]; then
     existing_prefix=$(grep "set.*prefix" "$HOME/.tmux.conf" 2>/dev/null | head -1 || true)
     if [[ -n "$existing_prefix" ]] && ! echo "$existing_prefix" | grep -q "C-a"; then
       CONFLICTS+=("tmux prefix key differs (ours: Ctrl+a)")
-      CONFLICT_FILES+=("~/.tmux.conf")
+      CONFLICT_FILES+=("$HOME/.tmux.conf")
       CONFLICT_ACTIONS+=("info: will use Ctrl+a after install")
     fi
   fi
 
   if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
     CONFLICTS+=("TPM already installed")
-    CONFLICT_FILES+=("~/.tmux/plugins/tpm")
+    CONFLICT_FILES+=("$HOME/.tmux/plugins/tpm")
     CONFLICT_ACTIONS+=("safe: will reuse existing TPM")
   fi
 fi

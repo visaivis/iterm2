@@ -218,9 +218,9 @@ if [[ -L "$tmux_conf" ]]; then
     ok "Removed: ~/.tmux.conf symlink"
   fi
 elif [[ -f "$tmux_conf" ]]; then
-  warn "~/.tmux.conf exists but is not a symlink (may be user's own). Leaving it."
+  warn "$HOME/.tmux.conf exists but is not a symlink (may be user's own). Leaving it."
 else
-  ok "~/.tmux.conf already removed"
+  ok "$HOME/.tmux.conf already removed"
 fi
 
 # =============================================================================
