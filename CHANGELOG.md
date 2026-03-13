@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Agent secret management guide (`docs/agent-secrets.md`) — 1Password + macOS Keychain architecture for secure, vault-per-project agent secret access
+- `auto-release.yml` workflow for automated releases on PR merge
+- `RELEASE_TOKEN` GitHub Actions secret for release workflow authentication
+
 ## [1.1.0] - 2026-03-13
 
 ### Added

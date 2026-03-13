@@ -59,6 +59,16 @@ bash install.sh --dry-run
 - `release.yml` — Auto-creates GitHub Release on tag push (triggered by `auto-release.yml`)
 - `issue-triage.yml` — Auto-labels new issues with `triage` and detects type from template
 
+## Agent Secret Management
+
+Agents access secrets (GitHub PATs, API keys) through a secure chain: macOS Keychain → 1Password service account → `op run` with `op://` references. See `docs/agent-secrets.md` for the full setup guide.
+
+Key points:
+- Each project has its own 1Password vault — agents cannot access secrets from other projects
+- No plaintext secrets anywhere — the bootstrap token lives in macOS Keychain
+- GitHub PATs are fine-grained and scoped to a single repository with least-privilege permissions
+- The `.env.agent` file contains `op://` references (not secrets) and is safe to commit
+
 ## Agentic SDLC
 
 This project is agentic-first. Issues flow through a label-based lifecycle managed by AI agents:
