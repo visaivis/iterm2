@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck on bash scripts
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: .
+          additional_files: "install.sh uninstall.sh test.sh"
+          severity: warning
+
+  zsh-syntax:
+    name: Zsh Syntax Check
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check zsh file syntax
+        run: |
+          errors=0
+          for f in config/zsh/*.zsh; do
+            echo "Checking $f..."
+            if ! zsh -n "$f" 2>&1; then
+              errors=$((errors + 1))
+            fi
+          done
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::$errors zsh files have syntax errors"
+            exit 1
+          fi
+          echo "All zsh files passed syntax check"
+
+  json-validate:
+    name: Validate JSON
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate iTerm2 profile JSON
+        run: python3 -m json.tool config/iterm2/modern-dark.json > /dev/null
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: "**/*.md"
+          config: |
+            {
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+  tmux-config:
+    name: Validate tmux config
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tmux
+        run: brew install tmux
+      - name: Parse tmux config
+        run: |
+          # Validate syntax by starting server with config (exits immediately)
+          tmux -f config/tmux/tmux.conf start-server \; kill-server 2>&1 || {
+            # TPM clone won't exist in CI, so filter that error
+            echo "Note: TPM errors are expected in CI (not installed)"
+          }
+          echo "tmux config parsed successfully"

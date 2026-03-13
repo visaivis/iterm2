@@ -1,0 +1,12 @@
+# Vendor dependencies (cloned at install time)
+vendor/fzf-tab/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store

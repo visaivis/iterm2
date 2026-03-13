@@ -1,0 +1,63 @@
+name: Brew Dependency Audit
+
+on:
+  schedule:
+    - cron: "0 9 * * 1" # Every Monday at 9 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-outdated:
+    name: Check Outdated Packages
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Brewfile packages
+        run: brew bundle --file=Brewfile --no-lock
+
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          outdated=$(brew outdated --verbose 2>/dev/null || true)
+          if [ -n "$outdated" ]; then
+            echo "has_outdated=true" >> "$GITHUB_OUTPUT"
+            # Write to file for the issue body
+            {
+              echo "body<<EOF"
+              echo "## Outdated Brew Packages"
+              echo ""
+              echo "The following packages from the Brewfile have newer versions available:"
+              echo ""
+              echo '```'
+              echo "$outdated"
+              echo '```'
+              echo ""
+              echo "**Action**: Review and update the Brewfile if appropriate."
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "has_outdated=false" >> "$GITHUB_OUTPUT"
+            echo "All packages are up to date"
+          fi
+
+      - name: Create or update issue
+        if: steps.outdated.outputs.has_outdated == 'true'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "chore: Outdated brew packages detected"
+          content-filepath: ""
+          labels: dependencies,maintenance
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Report outdated via summary
+        if: steps.outdated.outputs.has_outdated == 'true'
+        run: |
+          echo "## ⚠️ Outdated Packages Found" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Run \`brew outdated\` locally to review." >> "$GITHUB_STEP_SUMMARY"

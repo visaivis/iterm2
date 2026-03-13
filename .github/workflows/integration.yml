@@ -1,0 +1,56 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "install.sh"
+      - "uninstall.sh"
+      - "test.sh"
+      - "config/**"
+      - "Brewfile"
+  pull_request:
+    branches: [main]
+    paths:
+      - "install.sh"
+      - "uninstall.sh"
+      - "test.sh"
+      - "config/**"
+      - "Brewfile"
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    name: Dry Run Install & Uninstall
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dry-run install
+        run: bash install.sh --dry-run
+
+      - name: Dry-run uninstall
+        run: bash uninstall.sh --dry-run
+
+  sandbox:
+    name: Sandbox Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install test dependencies
+        run: |
+          brew install tmux fzf eza bat fd ripgrep zoxide git-delta
+
+      - name: Run sandbox test
+        run: bash test.sh --install-deps
+
+      - name: Verify config files exist
+        run: |
+          test -f config/iterm2/modern-dark.json
+          test -f config/tmux/tmux.conf
+          test -f config/git/delta.gitconfig
+          ls config/zsh/*.zsh | wc -l | grep -q '[1-9]'
+          echo "All config files verified"
