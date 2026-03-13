@@ -347,7 +347,7 @@ if ! $SKIP_BREW; then
     info "Would run: brew bundle --file=$SCRIPT_DIR/Brewfile"
   else
     log_action "BREW_BUNDLE $SCRIPT_DIR/Brewfile"
-    brew bundle --file="$SCRIPT_DIR/Brewfile" --no-lock || {
+    brew bundle --file="$SCRIPT_DIR/Brewfile" || {
       warn "Some packages may have failed. Continuing..."
     }
     ok "Homebrew packages installed"

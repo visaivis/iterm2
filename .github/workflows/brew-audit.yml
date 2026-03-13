@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Brewfile packages
-        run: brew bundle --file=Brewfile --no-lock
+        run: brew bundle --file=Brewfile
 
       - name: Check for outdated packages
         id: outdated
