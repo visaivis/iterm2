@@ -59,6 +59,24 @@ bash install.sh --dry-run
 - `release.yml` — Auto-creates GitHub Release on tag push (triggered by `auto-release.yml`)
 - `issue-triage.yml` — Auto-labels new issues with `triage` and detects type from template
 - `pr-gate.yml` — Validates PR has a linked, approved issue (required status check, blocks merge)
+- `opencode.yml` — Runs OpenCode cloud agent on `/opencode` or `/oc` comments (issues and PRs)
+
+## Agent Secret Management
+
+Agents access secrets through two modes depending on where they run. See `docs/agent-secrets.md` for the full setup guide.
+
+**Local agents** (opencode TUI, Warp):
+- 1Password desktop app + `op run` with `op://` references
+- Touch ID / biometric gates every agent launch — no tokens stored on disk
+- Each project has its own 1Password vault — agents cannot access secrets from other projects
+- The `.env.agent` file contains `op://` references (not secrets) and is safe to commit
+- Launch: `op run --env-file=.env.agent -- opencode`
+
+**Cloud agents** (OpenCode GitHub):
+- Triggered by `/opencode` or `/oc` comments on issues and PRs
+- Runs on GitHub Actions runners with secrets injected via `${{ secrets.* }}`
+- OpenCode GitHub App provides installation tokens for repo operations
+- Runner is destroyed after workflow completes — no secrets persist
 
 ## Agentic SDLC
 

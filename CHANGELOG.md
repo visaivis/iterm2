@@ -12,6 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pr-gate.yml` workflow — required status check that validates PRs link an approved issue before merge
 - Git hooks (`commit-msg`, `pre-push`) for local validation of issue references and branch naming
 - Hook install script: `bash .github/hooks/install.sh`
+- Agent secret management guide (`docs/agent-secrets.md`) — dual-mode architecture for local (1Password desktop app + `op run`) and cloud (OpenCode GitHub) agent secret access
+- `opencode.yml` workflow for cloud agent triggered by `/opencode` comments on issues and PRs
+- `.env.agent` environment reference file with `op://` references for local agent secret injection
+- `auto-release.yml` workflow for automated releases on PR merge
+- `RELEASE_TOKEN` GitHub Actions secret for release workflow authentication
+
+### Changed
+
+- Simplified local agent secret management — replaced service account + macOS Keychain with 1Password desktop app integration (Touch ID / biometric)
 
 ## [1.1.0] - 2026-03-13
 
