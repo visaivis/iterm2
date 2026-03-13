@@ -11,13 +11,19 @@ A curated dark iTerm2 profile with carefully tuned colors for readability and ae
 
 Installed as a Dynamic Profile — it doesn't replace your existing Default profile. Switch to it in iTerm2 → Settings → Profiles.
 
-## Powerlevel10k Enhancements
+## Powerlevel10k
 
-The overlay adds these on top of your existing p10k config:
+Powerlevel10k is installed automatically via Homebrew. The installer:
 
-- **Transient prompt**: previous prompts collapse to `❯`, reducing visual noise
-- **Theme-matched colors**: git status, directory, and execution time colors match the dark theme
-- **Command duration**: shows elapsed time for commands taking >3 seconds
+- **Auto-sources the theme** via `init.zsh` if not already loaded in your `.zshrc`
+- **Preserves your existing `~/.p10k.zsh`** — if you have one, it stays untouched
+- **Prompts you to configure** — if no `~/.p10k.zsh` exists, run `p10k configure` after install
+- **Applies an overlay** on top of your config with:
+  - **Transient prompt**: previous prompts collapse to `❯`, reducing visual noise
+  - **Theme-matched colors**: git status, directory, and execution time colors match the dark theme
+  - **Command duration**: shows elapsed time for commands taking >3 seconds
+
+Use `--skip-p10k` to disable the overlay and keep your p10k config completely untouched.
 
 ## Zsh Plugins
 

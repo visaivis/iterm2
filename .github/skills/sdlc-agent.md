@@ -88,8 +88,13 @@ git checkout -b agent/<number>-<slug>
 
 **Documentation** (`.md`):
 - Keep language clear and concise
-- Update the relevant doc when behavior changes
-- Add CHANGELOG entry under `## [Unreleased]`
+- **Every PR must update all affected documentation** — this is mandatory, not optional:
+  - `CHANGELOG.md` — add entry under `## [Unreleased]`
+  - `README.md` — if user-facing behavior, prerequisites, or install flow changed
+  - `docs/architecture.md` — if install/uninstall flow or sourcing chain changed
+  - `docs/features.md` — if feature behavior or keybindings changed
+  - `AGENTS.md` — if project structure, conventions, or testing changed
+  - `.github/skills/sdlc-agent.md` — if file scope or workflow rules changed
 
 **Brewfile**:
 - Group related packages with comments

@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Explicit agent governance rules: agents must never self-approve issues, merge own PRs, or approve own PRs
+- Powerlevel10k is now installed automatically via Brewfile (no longer a manual prerequisite)
+- `init.zsh` auto-sources the p10k theme if not already loaded by the user's `.zshrc`
+- `install.sh` step 6: verifies p10k install, detects existing `~/.p10k.zsh`, preserves user config
+- Uninstall summary notes that p10k remains installed and `~/.p10k.zsh` is untouched
+- PR template and SDLC skill now require documentation updates with every PR
+
+### Changed
+
+- Removed Powerlevel10k from Prerequisites in README (auto-installed now)
+- Install summary dynamically shows "run p10k configure" step when no config exists
 
 ## [1.0.0] - 2026-03-13
 

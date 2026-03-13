@@ -20,7 +20,7 @@ A reproducible, one-command setup for a polished iTerm2 + zsh development enviro
 - **Fuzzy everything** — Ctrl+R history search, Tab completion with previews, file finder
 - **tmux with AI layout** — persistent sessions, `ai-workspace` opens coding + OpenCode + test panes
 - **Modern CLI tools** — `eza`, `bat`, `fd`, `ripgrep`, `zoxide`, `delta` aliased over defaults
-- **Powerlevel10k enhancements** — transient prompt, theme-matched colors, command duration
+- **Powerlevel10k** — auto-installed, with transient prompt, theme-matched colors, command duration
 - **OpenCode CLI** — AI coding assistant in your terminal
 
 ## Prerequisites
@@ -29,7 +29,6 @@ A reproducible, one-command setup for a polished iTerm2 + zsh development enviro
 - **[Homebrew](https://brew.sh)** — `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 - **[iTerm2](https://iterm2.com)** — `brew install --cask iterm2`
 - **zsh** (default on macOS)
-- **[Powerlevel10k](https://github.com/romkatv/powerlevel10k)** — `brew install powerlevel10k` (if not already installed)
 
 ## Quick Start
 
@@ -44,13 +43,16 @@ cd ~/personal/iterm2
 # 3. Install
 ./install.sh
 
-# 4. Restart your terminal, then in iTerm2:
+# 4. Restart your terminal
+#    (if no p10k config exists, run: p10k configure)
+
+# 5. In iTerm2:
 #    Settings → Profiles → select "Modern Dark" → set as Default
 
-# 5. Install tmux plugins (inside tmux)
+# 6. Install tmux plugins (inside tmux)
 #    Press: Ctrl+a I
 
-# 6. Try the AI workspace
+# 7. Try the AI workspace
 ai-workspace
 ```
 
@@ -58,11 +60,12 @@ ai-workspace
 
 | Step | What | Reversible? |
 |---|---|---|
-| Brew packages | Installs tools from `Brewfile` | `--remove-packages` on uninstall |
+| Brew packages | Installs tools + Powerlevel10k from `Brewfile` | `--remove-packages` on uninstall |
 | iTerm2 profile | Adds "Modern Dark" Dynamic Profile | Removed on uninstall |
 | Zsh config | Symlinks `~/.modern-terminal/` + appends 1 line to `.zshrc` | Line removed, symlink deleted |
 | tmux config | Symlinks `~/.tmux.conf` + installs TPM | Symlink removed, original restored |
 | Git config | Adds `[include]` for delta | Include removed |
+| Powerlevel10k | Verifies install, preserves existing `~/.p10k.zsh` | Theme stays installed; overlay removed with config |
 
 Every modified file is backed up to `~/.terminal-config-backup/<timestamp>/`.
 

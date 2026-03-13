@@ -342,6 +342,8 @@ else
   • Restart your terminal for changes to take effect
   • Backups are still available at: ${DIM}$BACKUP_DIR${NC}
   • TPM plugins remain at: ${DIM}~/.tmux/plugins/${NC} (remove manually if desired)
+  • Powerlevel10k remains installed via Homebrew (use ${DIM}--remove-packages${NC} to uninstall)
+  • Your ~/.p10k.zsh config (if any) is untouched
   • To fully clean up backups: ${DIM}rm -rf $BACKUP_BASE${NC}
 "
 fi

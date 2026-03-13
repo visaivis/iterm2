@@ -15,11 +15,20 @@ source "$MODERN_TERMINAL_DIR/fzf.zsh"
 # 3. Modern CLI aliases (eza, bat, fd, ripgrep, zoxide)
 source "$MODERN_TERMINAL_DIR/aliases.zsh"
 
-# 4. Powerlevel10k enhancements
+# 4. Powerlevel10k theme (source if not already loaded by user's .zshrc)
+if [[ -z "$POWERLEVEL9K_VERSION" ]]; then
+  _p10k_theme="${HOMEBREW_PREFIX:-/opt/homebrew}/share/powerlevel10k/powerlevel10k.zsh-theme"
+  if [[ -f "$_p10k_theme" ]]; then
+    source "$_p10k_theme"
+  fi
+  unset _p10k_theme
+fi
+
+# 5. Powerlevel10k overlay (theme-matched colors, transient prompt)
 source "$MODERN_TERMINAL_DIR/p10k-overlay.zsh"
 
-# 5. tmux aliases and AI workspace layouts
+# 6. tmux aliases and AI workspace layouts
 source "$MODERN_TERMINAL_DIR/tmux.zsh"
 
-# 6. iTerm2 shell integration (must be near the end)
+# 7. iTerm2 shell integration (must be near the end)
 source "$MODERN_TERMINAL_DIR/iterm2-integration.zsh"
