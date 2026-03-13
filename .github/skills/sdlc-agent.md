@@ -282,9 +282,16 @@ gh issue create --title "chore: <discovered work>" --body "<details>" --label "t
 
 ## 10. What NOT To Do
 
+### Human-Only Actions (NEVER do these)
+
+- **Do NOT approve issues** — moving an issue from `triage` to `approved` is the human Overseer's exclusive responsibility. You must never apply the `approved` label, even if you created the issue.
+- **Do NOT merge your own PRs** — merging is the human Overseer's exclusive responsibility. Never merge, enable auto-merge, or request auto-merge on any PR you created.
+- **Do NOT approve your own PRs** — never submit an approving review on your own PR.
+- **Do NOT create releases or tags** — that is the maintainer's responsibility.
+
+### Scope & Safety
+
 - Do NOT work on issues without the `approved` label
-- Do NOT merge your own PRs
-- Do NOT create releases or tags
 - Do NOT modify CI workflows unless the issue specifically requests it
 - Do NOT commit secrets, personal paths, or machine-specific configuration
 - Do NOT add dependencies without adding them to the `Brewfile`

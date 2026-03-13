@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Explicit agent governance rules: agents must never self-approve issues, merge own PRs, or approve own PRs
+
 ## [1.0.0] - 2026-03-13
 
 ### Added

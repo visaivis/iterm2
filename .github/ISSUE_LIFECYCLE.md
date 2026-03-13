@@ -52,9 +52,11 @@ Applied during triage (matches issue templates):
 
 ### For the AI Agent (Polecat)
 
-1. Find issues with the `approved` label
+> **Hard rule**: The agent must NEVER approve issues, merge PRs, or approve its own PRs. These are exclusively human actions.
+
+1. Find issues with the `approved` label — never apply this label yourself
 2. Follow the full workflow in `.github/skills/sdlc-agent.md`
-3. Manage labels as you progress: `approved` → `in-progress` → `pr-submitted`
+3. Manage labels as you progress: `in-progress` → `pr-submitted` (remove `approved` when starting work)
 4. If blocked, label as `blocked` and comment with the specific blocker
 
 ### For Human Contributors
