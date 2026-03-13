@@ -2,47 +2,202 @@
 
 This guide covers how AI agents (Warp, opencode, etc.) securely access secrets for project workflows — GitHub SDLC automation, CI/CD tokens, API keys, and other integrations.
 
+## Security Principles for AI Agents
+
+AI agents introduce a fundamentally different threat model than traditional server-side applications. An agent's LLM operates in an untrusted inference environment with open-ended context windows and memory. Secrets passed into prompts, embeddings, or agent context cannot be revoked and may be cached, shared with downstream tools, or leaked via prompt injection.
+
+This architecture is designed around four principles aligned with industry best practices from 1Password, OWASP, and HashiCorp:
+
+### 1. Access Without Exposure
+
+Credentials are injected on behalf of the agent at the process level — the LLM never sees raw secrets. The `op run` command resolves `op://` references into environment variables for the subprocess only. The agent's CLI tools (e.g., `gh`) read `GH_TOKEN` from the environment, but the token never appears in the LLM's context window, prompt history, or tool call arguments.
+
+This follows 1Password's principle that "credential exchange must follow a separate, well-defined deterministic permissioned flow" — not through the non-deterministic data channel of the AI agent.
+
+### 2. Vault-Per-Project Isolation
+
+Each project gets its own 1Password vault containing only the secrets that project needs. A 1Password service account is scoped to a single vault, so an agent working on Project A literally cannot see secrets for Project B. This implements the principle of least privilege at the vault level.
+
+### 3. No Plaintext Secrets Anywhere
+
+Secrets never exist as plaintext on disk, in shell history, in process arguments, or in log files:
+- The service account token lives in a dedicated macOS Keychain (encrypted, isolated from login keychain)
+- Project secrets live in 1Password (encrypted at rest, AES-256-GCM)
+- The `.env.agent` file contains only `op://` references (safe to commit)
+- `op run` injects secrets as env vars for the subprocess duration only
+- When the process exits, the environment variables are gone
+
+### 4. Human-in-the-Loop for Sensitive Operations
+
+The agent cannot perform privileged actions without human oversight:
+- Branch rulesets prevent pushing to `main` (agent PAT is not admin)
+- The SDLC skill forbids agents from merging PRs, approving issues, or creating releases
+- GitHub fine-grained PATs have no Administration scope
+- Secret rotation and vault management remain human-only operations
+
+## Architecture
+
+### Component Overview
+
+```mermaid
+flowchart TB
+    subgraph "Trust Boundary: macOS (encrypted at rest)"
+        KC["agent-secrets.keychain-db\n(dedicated keychain)"]
+    end
+
+    subgraph "Trust Boundary: 1Password Cloud (E2E encrypted)"
+        SA["Service Account\n(vault-scoped, read-only)"]
+        V["1Password Vault\niterm2-agents"]
+        S1["GH_TOKEN\n(fine-grained PAT)"]
+        S2["SOME_API_KEY"]
+        S3["...future secrets"]
+        V --> S1
+        V --> S2
+        V --> S3
+    end
+
+    subgraph "Trust Boundary: Local Process (runtime only)"
+        OP["op run\n(resolves op:// refs)"]
+        ENV[".env.agent\n(op:// references only)"]
+        AGENT["Agent Process\n(opencode / warp)"]
+        CLI["CLI Tools\n(gh, git, curl)"]
+    end
+
+    subgraph "Trust Boundary: GitHub (remote)"
+        GH["GitHub API\n(repos, issues, PRs)"]
+        RS["Branch Ruleset\n(blocks direct push)"]
+    end
+
+    KC -->|"OP_SERVICE_ACCOUNT_TOKEN\n(retrieved at runtime)"| OP
+    OP -->|"authenticates as\nservice account"| SA
+    SA -->|"scoped access"| V
+    ENV -->|"op:// references"| OP
+    OP -->|"env vars injected\ninto subprocess"| AGENT
+    AGENT --> CLI
+    CLI -->|"GH_TOKEN in env"| GH
+    GH --> RS
+```
+
+### Secret Access Flow (Swimlane)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Human as Human (you)
+    participant KC as macOS Keychain
+    participant OP as op CLI
+    participant 1P as 1Password Cloud
+    participant Agent as Agent Process
+    participant GH as GitHub API
+
+    Note over Human,GH: Agent Launch Sequence
+
+    Human->>KC: security find-generic-password
+    KC-->>Human: OP_SERVICE_ACCOUNT_TOKEN
+    Note right of KC: Token never printed,<br/>captured via $(...)
+
+    Human->>OP: op run --env-file=.env.agent -- opencode
+    OP->>OP: Read .env.agent (op:// references)
+
+    OP->>1P: Authenticate with service account token
+    1P-->>OP: Session established (vault-scoped)
+
+    OP->>1P: Resolve op://iterm2-agents/iterm2-agent-github-pat/password
+    1P-->>OP: Decrypted secret value
+    Note right of 1P: Secret decrypted in memory,<br/>never written to disk
+
+    OP->>Agent: Spawn subprocess with GH_TOKEN in env
+    Note right of Agent: LLM context never sees<br/>raw token value
+
+    Note over Agent,GH: Agent SDLC Workflow
+
+    Agent->>GH: gh issue list (uses GH_TOKEN from env)
+    GH-->>Agent: Issue data
+
+    Agent->>GH: git push origin agent/42-fix-bug
+    GH-->>Agent: Push accepted (branch only)
+
+    Agent->>GH: gh pr create
+    GH-->>Agent: PR #42 created
+
+    Agent-xGH: git push origin main
+    GH--xAgent: DENIED (branch ruleset)
+
+    Note over Human,GH: Agent Exit
+
+    Agent-->>OP: Process exits
+    OP-->>OP: Env vars destroyed
+    Note right of OP: No secrets remain<br/>in memory or on disk
+```
+
+### Trust Boundaries
+
+```mermaid
+flowchart LR
+    subgraph RED["🔴 Untrusted: LLM Context"]
+        LLM["LLM inference\n(prompts, tool calls,\ncontext window)"]
+    end
+
+    subgraph YELLOW["🟡 Controlled: Agent Process"]
+        PROC["Process env vars\n(GH_TOKEN, API keys)"]
+        TOOLS["CLI tools\n(gh, git)"]
+        PROC --> TOOLS
+    end
+
+    subgraph GREEN["🟢 Trusted: Secret Stores"]
+        KC2["macOS Keychain\n(service account token)"]
+        OP2["1Password\n(project secrets)"]
+    end
+
+    GREEN -->|"runtime injection\nvia op run"| YELLOW
+    YELLOW -->|"tool output only\n(no raw secrets)"| RED
+    RED -.->|"❌ NO direct access\nto secrets"| GREEN
+```
+
+Key boundaries:
+- **Red (Untrusted)**: The LLM context. Secrets must never enter this zone. The LLM sees tool output (e.g., "PR created") but never the token used to create it.
+- **Yellow (Controlled)**: The agent process. Secrets exist as env vars here. CLI tools use them to authenticate. This is the minimum necessary exposure.
+- **Green (Trusted)**: Secret stores. macOS Keychain and 1Password. Encrypted at rest, access-controlled, audit-logged.
+
+### Multi-Project Isolation
+
+```mermaid
+flowchart TB
+    KC3["agent-secrets.keychain-db\n(shared keychain)"]
+
+    subgraph "Project A"
+        SA_A["Service Account A"]
+        V_A["Vault: project-a-agents"]
+        A_AGENT["Agent A"]
+    end
+
+    subgraph "Project B"
+        SA_B["Service Account B"]
+        V_B["Vault: project-b-agents"]
+        B_AGENT["Agent B"]
+    end
+
+    KC3 -->|"service=project-a-agents"| SA_A
+    KC3 -->|"service=project-b-agents"| SA_B
+    SA_A -->|"scoped to"| V_A
+    SA_B -->|"scoped to"| V_B
+    V_A --> A_AGENT
+    V_B --> B_AGENT
+    SA_A -.->|"❌ cannot access"| V_B
+    SA_B -.->|"❌ cannot access"| V_A
+```
+
+All projects share a single dedicated keychain but use different service names (`-s` flag). Each service account is scoped to exactly one vault. Compromising Agent A's service account reveals nothing about Project B.
+
 ## Why This Architecture
 
-AI agents need secrets to automate workflows on your behalf — creating branches, managing issues, opening PRs. But agents should never have access beyond what their specific project requires. The architecture enforces three security principles:
+AI agents need secrets to automate workflows on your behalf — creating branches, managing issues, opening PRs. But agents should never have access beyond what their specific project requires. The architecture enforces the four security principles above while remaining practical for solo developers and small teams.
 
-1. **Vault-per-project isolation** — each project gets its own 1Password vault containing only the secrets that project needs. An agent working on Project A cannot read secrets for Project B.
-
-2. **No plaintext secrets anywhere** — the 1Password service account token (the one secret that bootstraps everything) is stored in macOS Keychain, encrypted at rest and protected by system authentication. All other secrets are resolved at runtime via `op://` references.
-
-3. **Least-privilege scoping** — GitHub fine-grained PATs are scoped to a single repository with only the permissions the agent needs. The agent cannot modify branch protection, merge PRs, or access other repos.
-
-## Security Model
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  macOS Keychain: agent-secrets.keychain-db                   │
-│  (dedicated keychain — isolated from login keychain)         │
-│  └── OP_SERVICE_ACCOUNT_TOKEN                               │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ retrieved at runtime
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  1Password Service Account (scoped to one vault)            │
-│  └── authenticates `op` CLI                                 │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ op run resolves op:// references
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  1Password Vault: "iterm2-agents"                           │
-│  ├── iterm2-agent-github-pat  (GH_TOKEN)                   │
-│  ├── some-api-key             (SOME_API_KEY)                │
-│  └── ...future secrets                                      │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ injected as env vars
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│  Agent Process (warp, opencode, etc.)                       │
-│  └── sees GH_TOKEN, SOME_API_KEY as env vars                │
-│      never sees raw service account token                   │
-│      cannot access other vaults                             │
-└─────────────────────────────────────────────────────────────┘
-```
+Alternative approaches and why they fall short:
+- **Hardcoded secrets in `.env` files** — plaintext on disk, easily committed to git, no rotation, no audit trail
+- **Secrets in LLM prompts or MCP context** — the LLM may cache, log, or leak them via prompt injection; no revocation model once secrets enter the context
+- **Login keychain for agent secrets** — agents gain access to Wi-Fi passwords, browser certificates, and other personal credentials
+- **Single shared token for all projects** — compromising one project compromises all; no isolation, no least-privilege
 
 ## Prerequisites
 
@@ -327,3 +482,28 @@ The agent PAT should belong to a non-admin user, or the branch ruleset should bl
 ```bash
 gh api repos/<owner>/<repo>/rulesets --jq '.[].bypass_actors'
 ```
+
+## References
+
+### Standards
+- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html) — organization-wide secrets management best practices
+- [OWASP SAMM — Secret Management](https://owaspsamm.org/model/implementation/secure-deployment/stream-b/) — inject production secrets during deployment, not before
+
+### 1Password Official
+- [Secure Agentic AI](https://1password.com/solutions/agentic-ai) — 1Password's approach to AI agent authentication and credential control
+- [Security Principles Guiding 1Password's Approach to AI](https://1password.com/blog/security-principles-guiding-1passwords-approach-to-ai) — raw secrets have no place in LLM context
+- [Where MCP Fits and Where It Doesn't](https://blog.1password.com/where-mcp-fits-and-where-it-doesnt/) — why 1Password will not expose raw credentials via MCP
+- [Securing MCP Servers with 1Password](https://1password.com/blog/securing-mcp-servers-with-1password-stop-credential-exposure-in-your-agent) — the `op run` + `op://` pattern for AI tools
+- [1Password Service Accounts](https://developer.1password.com/docs/service-accounts/) — vault-scoped, least-privilege access for automation
+- [Load Secrets into the Environment](https://developer.1password.com/docs/cli/secrets-environment-variables/) — `op run` documentation
+
+### AI Agent Patterns
+- [HashiCorp Vault: AI Agent Identity](https://developer.hashicorp.com/validated-patterns/vault/ai-agent-identity-with-hashicorp-vault) — enterprise dynamic secrets for AI agents with OAuth 2.0 token exchange
+- [Fast.io: AI Agent Credential Vault](https://fast.io/resources/ai-agent-credential-vault/) — every AI agent should have its own unique credentials
+- [Scalekit: Token Vault for AI Agent Workflows](https://www.scalekit.com/blog/token-vault-ai-agent-workflows) — centralized credential management for autonomous agents
+- [Secret Management for AI Coding Agents (op-env)](https://gist.github.com/DAESA24/dc26fa5b63fcd6b4c688772c9d0eb5ca) — community pattern for 1Password + interactive CLI agents
+
+### Blog Posts
+- [Stop Putting Secrets in .env Files](https://jonmagic.com/posts/stop-putting-secrets-in-dotenv-files/) — vault-per-project pattern with 1Password and macOS Keychain
+- [Keeping Credentials Out of Code](https://www.infralovers.com/blog/2025-11-05-credential-management-1password-vault/) — `op run` for runtime injection without shell history exposure
+- [NSHipster: op run](https://nshipster.com/1password-cli/) — dynamically inject secrets from 1Password vaults into development workflows
