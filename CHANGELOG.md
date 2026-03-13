@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-13
+
 ### Added
 
 - `pr-gate.yml` workflow — required status check that validates PRs link an approved issue before merge
