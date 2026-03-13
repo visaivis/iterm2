@@ -55,7 +55,8 @@ bash install.sh --dry-run
 - `ci.yml` — ShellCheck, zsh syntax, JSON validation, markdown lint (runs on every push/PR)
 - `integration.yml` — Dry-run install/uninstall + sandbox test on macOS (runs when scripts/config change)
 - `brew-audit.yml` — Weekly check for outdated Homebrew packages
-- `release.yml` — Auto-creates GitHub Release on tag push
+- `auto-release.yml` — Determines semver bump from PR title on merge, updates CHANGELOG, creates tag
+- `release.yml` — Auto-creates GitHub Release on tag push (triggered by `auto-release.yml`)
 - `issue-triage.yml` — Auto-labels new issues with `triage` and detects type from template
 
 ## Agentic SDLC

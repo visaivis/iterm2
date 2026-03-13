@@ -1,0 +1,100 @@
+name: Auto Release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Tag and Release
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Determine version bump from PR title
+        id: bump
+        run: |
+          pr_title="${{ github.event.pull_request.title }}"
+
+          # Check for breaking change indicators
+          if echo "$pr_title" | grep -qiE 'BREAKING CHANGE|^[a-z]+!:'; then
+            echo "type=major" >> "$GITHUB_OUTPUT"
+          elif echo "$pr_title" | grep -qE '^feat(\(.+\))?:'; then
+            echo "type=minor" >> "$GITHUB_OUTPUT"
+          else
+            # fix, docs, chore, refactor, test, ci — all patch
+            echo "type=patch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Calculate next version
+        id: version
+        run: |
+          latest=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          latest="${latest#v}"
+          IFS='.' read -r major minor patch <<< "$latest"
+
+          case "${{ steps.bump.outputs.type }}" in
+            major) major=$((major + 1)); minor=0; patch=0 ;;
+            minor) minor=$((minor + 1)); patch=0 ;;
+            patch) patch=$((patch + 1)) ;;
+          esac
+
+          echo "tag=v${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+          echo "number=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
+
+      - name: Check for unreleased changelog entries
+        id: changelog
+        run: |
+          # Extract content between [Unreleased] and the next ## heading
+          unreleased=$(awk '/^## \[Unreleased\]/{found=1; next} /^## \[/{found=0} found{print}' CHANGELOG.md)
+          # Strip blank lines and check if anything remains
+          content=$(echo "$unreleased" | grep -v '^$' || true)
+          if [ -z "$content" ]; then
+            echo "has_entries=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_entries=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update CHANGELOG.md
+        if: steps.changelog.outputs.has_entries == 'true'
+        run: |
+          version="${{ steps.version.outputs.number }}"
+          date=$(date +%Y-%m-%d)
+
+          # Insert versioned heading after [Unreleased], preserving content
+          awk -v ver="$version" -v d="$date" '
+            /^## \[Unreleased\]/ {
+              print
+              print ""
+              print "## [" ver "] - " d
+              next
+            }
+            { print }
+          ' CHANGELOG.md > CHANGELOG.tmp && mv CHANGELOG.tmp CHANGELOG.md
+
+      - name: Commit changelog and create tag
+        run: |
+          version="${{ steps.version.outputs.tag }}"
+
+          git add CHANGELOG.md
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: release ${version}"
+            git push origin main
+          fi
+
+          pr_title="${{ github.event.pull_request.title }}"
+          git tag -a "$version" -m "${version}: ${pr_title}"
+          git push origin "$version"

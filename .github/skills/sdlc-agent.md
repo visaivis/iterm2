@@ -244,7 +244,12 @@ Once the maintainer merges the PR:
 
 - GitHub auto-closes the issue via `Closes #N`
 - The `pr-submitted` label can be cleaned up manually or via automation
-- Do NOT create tags or releases — that is the maintainer's responsibility
+- **Automated release**: the `auto-release.yml` workflow runs automatically and:
+  1. Determines the semver bump from the PR title prefix (`feat:` → minor, `fix:`/`docs:`/`chore:` → patch, `BREAKING CHANGE` or `!:` → major)
+  2. Promotes the `[Unreleased]` entries in `CHANGELOG.md` to the new version
+  3. Commits the changelog update and creates a git tag
+  4. The tag push triggers `release.yml` which creates the GitHub Release
+- Because releases are automated, agents must ensure `CHANGELOG.md` entries under `[Unreleased]` are accurate — they become the release notes
 
 ## 9. Error Handling
 
@@ -292,7 +297,7 @@ gh issue create --title "chore: <discovered work>" --body "<details>" --label "t
 - **Do NOT approve issues** — moving an issue from `triage` to `approved` is the human Overseer's exclusive responsibility. You must never apply the `approved` label, even if you created the issue.
 - **Do NOT merge your own PRs** — merging is the human Overseer's exclusive responsibility. Never merge, enable auto-merge, or request auto-merge on any PR you created.
 - **Do NOT approve your own PRs** — never submit an approving review on your own PR.
-- **Do NOT create releases or tags** — that is the maintainer's responsibility.
+- **Do NOT manually create releases or tags** — releases are automated via `auto-release.yml` on PR merge.
 
 ### Scope & Safety
 
