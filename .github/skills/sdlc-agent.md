@@ -140,7 +140,7 @@ Add lazygit to Brewfile and create `lg` alias in aliases.zsh.
 Update features.md with keybinding reference.
 
 Closes #15
-Co-Authored-By: Oz <oz-agent@warp.dev>
+Co-Authored-By: ai-agent <agent@visaivis.dev>
 ```
 
 ```
@@ -150,7 +150,7 @@ The preview window was clipped at 50% in tmux panes narrower
 than 80 columns. Use dynamic height calculation instead.
 
 Closes #42
-Co-Authored-By: Oz <oz-agent@warp.dev>
+Co-Authored-By: ai-agent <agent@visaivis.dev>
 ```
 
 ## 6. Pre-Push Validation
@@ -218,7 +218,7 @@ Closes #<issue-number>
 ## Agent Attribution
 
 This PR was authored by an AI agent.
-Co-Authored-By: Oz <oz-agent@warp.dev>
+Co-Authored-By: ai-agent <agent@visaivis.dev>
 EOF
 )" \
   --base main

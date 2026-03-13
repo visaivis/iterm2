@@ -35,4 +35,4 @@ Closes #<!-- issue number -->
 ## Attribution
 
 <!-- If this PR was authored by an AI agent, include the co-author line -->
-<!-- Co-Authored-By: Oz <oz-agent@warp.dev> -->
+<!-- Co-Authored-By: ai-agent <agent@visaivis.dev> -->
