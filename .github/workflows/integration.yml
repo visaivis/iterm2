@@ -32,7 +32,15 @@ jobs:
         run: bash install.sh --dry-run
 
       - name: Dry-run uninstall
-        run: bash uninstall.sh --dry-run
+        run: |
+          # uninstall.sh exits 1 if no prior install exists, which is expected in CI
+          bash uninstall.sh --dry-run || {
+            if [[ $? -eq 1 ]]; then
+              echo "Expected: no backup directory exists (install was dry-run only)"
+            else
+              exit 1
+            fi
+          }
 
   sandbox:
     name: Sandbox Test

@@ -21,6 +21,7 @@ jobs:
           scandir: .
           additional_files: "install.sh uninstall.sh test.sh"
           severity: warning
+          ignore_paths: config/zsh
 
   zsh-syntax:
     name: Zsh Syntax Check
@@ -58,12 +59,6 @@ jobs:
       - uses: DavidAnson/markdownlint-cli2-action@v19
         with:
           globs: "**/*.md"
-          config: |
-            {
-              "MD013": false,
-              "MD033": false,
-              "MD041": false
-            }
 
   tmux-config:
     name: Validate tmux config
