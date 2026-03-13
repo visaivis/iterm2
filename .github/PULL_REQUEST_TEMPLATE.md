@@ -31,8 +31,3 @@ Closes #<!-- issue number -->
 - [ ] Updated `CHANGELOG.md` under `[Unreleased]`
 - [ ] Updated docs if behavior changed
 - [ ] No secrets or personal paths committed
-
-## Attribution
-
-<!-- If this PR was authored by an AI agent, include the co-author line -->
-<!-- Co-Authored-By: ai-agent <agent@visaivis.dev> -->

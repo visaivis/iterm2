@@ -112,7 +112,6 @@ git checkout -b agent/<number>-<slug>
 <optional body explaining why, not what>
 
 Closes #<issue-number>
-Co-Authored-By: <agent-name> <agent-email>
 ```
 
 ### Types
@@ -129,7 +128,6 @@ Co-Authored-By: <agent-name> <agent-email>
 - Subject line: imperative mood, no period, max 72 characters
 - Reference the issue number in the commit body with `Closes #N`
 - One logical change per commit (split if needed)
-- Include the co-author attribution line
 
 ### Examples
 
@@ -140,7 +138,6 @@ Add lazygit to Brewfile and create `lg` alias in aliases.zsh.
 Update features.md with keybinding reference.
 
 Closes #15
-Co-Authored-By: ai-agent <agent@visaivis.dev>
 ```
 
 ```
@@ -150,7 +147,6 @@ The preview window was clipped at 50% in tmux panes narrower
 than 80 columns. Use dynamic height calculation instead.
 
 Closes #42
-Co-Authored-By: ai-agent <agent@visaivis.dev>
 ```
 
 ## 6. Pre-Push Validation
@@ -215,10 +211,6 @@ Closes #<issue-number>
 - [x] `bash test.sh` passes in sandbox
 - [x] CHANGELOG.md updated under [Unreleased]
 
-## Agent Attribution
-
-This PR was authored by an AI agent.
-Co-Authored-By: ai-agent <agent@visaivis.dev>
 EOF
 )" \
   --base main
