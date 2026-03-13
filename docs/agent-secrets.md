@@ -16,7 +16,8 @@ AI agents need secrets to automate workflows on your behalf — creating branche
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  macOS Keychain (encrypted, biometric/password protected)   │
+│  macOS Keychain: agent-secrets.keychain-db                   │
+│  (dedicated keychain — isolated from login keychain)         │
 │  └── OP_SERVICE_ACCOUNT_TOKEN                               │
 └──────────────────────┬──────────────────────────────────────┘
                        │ retrieved at runtime
@@ -59,16 +60,19 @@ If you're setting this up for the first time, run through these steps in order:
 # 2. Create a GitHub fine-grained PAT (via github.com UI)
 # 3. Store the PAT in the vault (via 1password.com UI)
 # 4. Create a 1Password service account scoped to the vault (via 1password.com UI)
-# 5. Store the service account token in macOS Keychain:
-security add-generic-password -a "op-service-account" -s "iterm2-agents" -w
+# 5. Create a dedicated keychain for agent secrets:
+security create-keychain -p "" agent-secrets.keychain-db
 
-# 6. Create the env file with op:// references:
+# 6. Store the service account token in the dedicated keychain:
+security add-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db
+
+# 7. Create the env file with op:// references:
 cat > .env.agent <<'EOF'
 GH_TOKEN=op://iterm2-agents/iterm2-agent-github-pat/credential
 EOF
 
-# 7. Launch your agent:
-OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w) \
+# 8. Launch your agent:
+OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db) \
   op run --env-file=.env.agent -- opencode
 ```
 
@@ -159,35 +163,47 @@ Service accounts restrict CLI access to specific vaults. The agent authenticates
 
 > **Important**: This token is shown only once. If you lose it, you'll need to create a new service account.
 
-## Step 5: Store the Service Account Token in macOS Keychain
+## Step 5: Create a Dedicated Keychain
 
-This is the one secret that bootstraps everything. Instead of storing it in a file or environment variable, it lives in macOS Keychain — encrypted at rest and protected by your system login.
+Agents should not have access to your login keychain (which contains Wi-Fi passwords, browser certificates, and other personal credentials). Create a dedicated keychain that holds only agent secrets:
+
+```bash
+security create-keychain -p "" agent-secrets.keychain-db
+```
+
+This creates an empty, unlocked keychain file at `~/Library/Keychains/agent-secrets.keychain-db`. The `-p ""` sets an empty password — the keychain is protected by macOS file permissions, and the secrets inside are still encrypted.
+
+## Step 6: Store the Service Account Token
+
+Store the 1Password service account token in the dedicated keychain:
 
 ```bash
 security add-generic-password \
   -a "op-service-account" \
   -s "iterm2-agents" \
-  -w
+  -w \
+  agent-secrets.keychain-db
 ```
 
 You will be prompted to enter the token (input is hidden). The parameters:
 - `-a` (account): identifier for the credential type
 - `-s` (service): your vault/project name (used to look it up later)
 - `-w`: prompt for the password interactively (not passed on the command line)
+- `agent-secrets.keychain-db`: the target keychain (not the default login keychain)
 
 To verify it was stored:
 
 ```bash
-security find-generic-password -a "op-service-account" -s "iterm2-agents"
+security find-generic-password -a "op-service-account" -s "iterm2-agents" agent-secrets.keychain-db
 ```
 
 This prints metadata (not the token itself). To retrieve the token value (used in scripts):
 
 ```bash
-security find-generic-password -a "op-service-account" -s "iterm2-agents" -w
+security find-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db
 ```
 
-## Step 6: Create the Environment Reference File
+## Step 7: Create the Environment Reference File
 
 Create `.env.agent` in the project root. This file contains `op://` references — not actual secrets — so it is safe to commit.
 
@@ -209,12 +225,12 @@ SLACK_WEBHOOK=op://iterm2-agents/slack-webhook/password
 SOME_API_KEY=op://iterm2-agents/some-api-key/password
 ```
 
-## Step 7: Launch the Agent
+## Step 8: Launch the Agent
 
-Combine macOS Keychain retrieval with `op run` to launch the agent with all secrets injected:
+Combine Keychain retrieval with `op run` to launch the agent with all secrets injected:
 
 ```bash
-OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w) \
+OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db) \
   op run --env-file=.env.agent -- opencode
 ```
 
@@ -231,7 +247,7 @@ Add to your `~/.zshrc` or `~/.modern-terminal/custom.zsh` for convenience:
 
 ```bash
 agent-opencode() {
-  OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w) \
+  OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db) \
     op run --env-file="${1:-.env.agent}" -- opencode
 }
 ```
@@ -262,18 +278,18 @@ To set up agent secrets for a new project:
 
 1. Create a new 1Password vault: `<project>-agents`
 2. Create a new service account scoped to that vault
-3. Store the service account token in Keychain with a unique `-s` (service) name:
+3. Store the service account token in the dedicated keychain:
    ```bash
-   security add-generic-password -a "op-service-account" -s "<project>-agents" -w
+   security add-generic-password -a "op-service-account" -s "<project>-agents" -w agent-secrets.keychain-db
    ```
 4. Create the project's `.env.agent` with `op://` references
 5. Launch with the project-specific Keychain entry:
    ```bash
-   OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "<project>-agents" -w) \
+   OP_SERVICE_ACCOUNT_TOKEN=$(security find-generic-password -a "op-service-account" -s "<project>-agents" -w agent-secrets.keychain-db) \
      op run --env-file=.env.agent -- opencode
    ```
 
-Each project is fully isolated — different vault, different service account, different Keychain entry.
+All projects share the same `agent-secrets.keychain-db` keychain but use different `-s` (service) names. Each is fully isolated — different vault, different service account, different Keychain entry.
 
 ## Token Rotation
 
@@ -300,7 +316,11 @@ Check that:
 - The service account has access to the vault
 
 ### `security` command hangs or prompts for password
-macOS Keychain may prompt for your login password the first time a new application accesses a stored credential. Click "Always Allow" to avoid future prompts from the same caller.
+If the dedicated keychain is locked, unlock it first:
+```bash
+security unlock-keychain agent-secrets.keychain-db
+```
+The keychain created with `-p ""` should remain unlocked during your session, but macOS may lock it after a reboot or timeout.
 
 ### Agent can push to `main` unexpectedly
 The agent PAT should belong to a non-admin user, or the branch ruleset should block non-bypass actors. Verify:

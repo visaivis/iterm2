@@ -61,11 +61,11 @@ bash install.sh --dry-run
 
 ## Agent Secret Management
 
-Agents access secrets (GitHub PATs, API keys) through a secure chain: macOS Keychain → 1Password service account → `op run` with `op://` references. See `docs/agent-secrets.md` for the full setup guide.
+Agents access secrets (GitHub PATs, API keys) through a secure chain: dedicated macOS Keychain → 1Password service account → `op run` with `op://` references. See `docs/agent-secrets.md` for the full setup guide.
 
 Key points:
 - Each project has its own 1Password vault — agents cannot access secrets from other projects
-- No plaintext secrets anywhere — the bootstrap token lives in macOS Keychain
+- No plaintext secrets anywhere — the bootstrap token lives in a dedicated macOS Keychain (`agent-secrets.keychain-db`), isolated from the login keychain
 - GitHub PATs are fine-grained and scoped to a single repository with least-privilege permissions
 - The `.env.agent` file contains `op://` references (not secrets) and is safe to commit
 
