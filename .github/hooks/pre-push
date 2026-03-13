@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# pre-push hook: Validates branch naming convention.
+#
+# Allowed patterns:
+#   agent/<issue-number>-<slug>   (agent SDLC work)
+#   feat/<slug>                   (feature branches)
+#   fix/<slug>                    (bugfix branches)
+#   docs/<slug>                   (documentation branches)
+#   chore/<slug>                  (maintenance branches)
+#   main                          (direct push blocked by ruleset, but allowed here)
+#
+# Skip with: git push --no-verify
+#
+# Install: bash .github/hooks/install.sh
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# Allow detached HEAD (e.g. CI)
+if [ -z "$branch" ]; then
+  exit 0
+fi
+
+# Allowed branch patterns
+if echo "$branch" | grep -qE "^(agent/[0-9]+-[a-z0-9-]+|feat/[a-z0-9-]+|fix/[a-z0-9-]+|docs/[a-z0-9-]+|chore/[a-z0-9-]+|main)$"; then
+  exit 0
+fi
+
+echo "ERROR: Branch name '$branch' does not follow the naming convention."
+echo ""
+echo "  Allowed patterns:"
+echo "    agent/<issue-number>-<slug>   (e.g. agent/7-enforce-issue-linkage)"
+echo "    feat/<slug>                   (e.g. feat/agent-secrets)"
+echo "    fix/<slug>                    (e.g. fix/fzf-keybinding)"
+echo "    docs/<slug>                   (e.g. docs/update-readme)"
+echo "    chore/<slug>                  (e.g. chore/update-deps)"
+echo ""
+echo "  To skip this check: git push --no-verify"
+exit 1
