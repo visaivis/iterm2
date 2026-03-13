@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# commit-msg hook: Validates that commit messages reference an issue.
+#
+# Checks for: Closes #N, Fixes #N, Resolves #N, Refs #N
+# Skip with: git commit --no-verify
+#
+# Install: bash .github/hooks/install.sh
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Allow merge commits and fixup/squash commits
+if echo "$commit_msg" | grep -qE "^(Merge|fixup!|squash!)"; then
+  exit 0
+fi
+
+# Check for issue reference
+if ! echo "$commit_msg" | grep -qEi "(close[sd]?|fix(e[sd])?|resolve[sd]?|refs?)\s+#[0-9]+"; then
+  echo "ERROR: Commit message must reference an issue."
+  echo ""
+  echo "  Use one of: Closes #N, Fixes #N, Resolves #N, Refs #N"
+  echo ""
+  echo "  Example:"
+  echo "    feat: add pr gate workflow"
+  echo ""
+  echo "    Closes #7"
+  echo ""
+  echo "  To skip this check: git commit --no-verify"
+  exit 1
+fi

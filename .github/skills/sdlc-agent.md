@@ -298,6 +298,7 @@ gh issue create --title "chore: <discovered work>" --body "<details>" --label "t
 - **Do NOT merge your own PRs** — merging is the human Overseer's exclusive responsibility. Never merge, enable auto-merge, or request auto-merge on any PR you created.
 - **Do NOT approve your own PRs** — never submit an approving review on your own PR.
 - **Do NOT manually create releases or tags** — releases are automated via `auto-release.yml` on PR merge.
+- **Do NOT create PRs without a linked, approved issue** — every PR must reference an issue using `Closes #N` in the title or body. The `pr-gate.yml` required status check will block merge if this is missing or the issue was never approved.
 
 ### Scope & Safety
 
@@ -307,3 +308,32 @@ gh issue create --title "chore: <discovered work>" --body "<details>" --label "t
 - Do NOT add dependencies without adding them to the `Brewfile`
 - Do NOT make unrelated changes in the same PR
 - Do NOT force-push unless rebasing to resolve conflicts
+
+## 11. Enforcement
+
+Issue linkage and approval are enforced at multiple layers. Even in interactive sessions (e.g., the user asks you to implement something directly), you must create an issue first and wait for approval before creating a branch or PR.
+
+### Server-Side: PR Gate (cannot be bypassed)
+
+The `pr-gate.yml` workflow runs on every PR targeting `main` and is a **required status check** in the branch ruleset. It:
+
+1. Parses the PR title and body for `Closes #N`, `Fixes #N`, or `Resolves #N`
+2. Looks up each linked issue via the GitHub API
+3. Checks if the issue currently has or historically had the `approved` label
+4. **Fails the check** if no linked issue is found or none were ever approved
+
+Because this is a required status check, the PR cannot be merged until it passes.
+
+### Client-Side: Git Hooks (convenience, bypassable)
+
+Git hooks in `.github/hooks/` catch mistakes before they reach CI:
+
+- **`commit-msg`**: Rejects commits that don't contain `Closes #N`, `Fixes #N`, `Resolves #N`, or `Refs #N`
+- **`pre-push`**: Rejects pushes from branches that don't match the naming convention (`agent/<number>-<slug>`, `feat/<slug>`, `fix/<slug>`, `docs/<slug>`, `chore/<slug>`)
+
+These can be skipped with `--no-verify`, which is fine because the server-side gate catches it.
+
+Install hooks:
+```bash
+bash .github/hooks/install.sh
+```
