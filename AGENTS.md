@@ -60,6 +60,16 @@ bash install.sh --dry-run
 - `issue-triage.yml` — Auto-labels new issues with `triage` and detects type from template
 - `pr-gate.yml` — Validates PR has a linked, approved issue (required status check, blocks merge)
 
+## Agent Secret Management
+
+Agents access secrets (GitHub PATs, API keys) through a secure chain: macOS Keychain → 1Password service account → `op run` with `op://` references. See `docs/agent-secrets.md` for the full setup guide.
+
+Key points:
+- Each project has its own 1Password vault — agents cannot access secrets from other projects
+- No plaintext secrets anywhere — the bootstrap token lives in macOS Keychain
+- GitHub PATs are fine-grained and scoped to a single repository with least-privilege permissions
+- The `.env.agent` file contains `op://` references (not secrets) and is safe to commit
+
 ## Agentic SDLC
 
 This project is agentic-first. Issues flow through a label-based lifecycle managed by AI agents:
