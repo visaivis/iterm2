@@ -448,7 +448,7 @@ OpenCode will read the context, implement changes, and respond directly on the i
 
 When a new integration requires a secret:
 
-### For local agents:
+### For Local Agents
 1. **Create the secret** (API key, token, etc.) from the provider
 2. **Store in 1Password** → your project vault → new item
 3. **Add the `op://` reference** to `.env.agent`:
@@ -457,7 +457,7 @@ When a new integration requires a secret:
    ```
 4. **Restart the agent** — `op run` resolves references at launch time
 
-### For cloud agents:
+### For Cloud Agents
 1. **Create the secret** from the provider
 2. **Store as a GitHub Actions secret**:
    ```bash
@@ -469,13 +469,13 @@ When a new integration requires a secret:
 
 To set up agent secrets for a new project:
 
-### Local:
+### Local
 1. Create a new 1Password vault: `<project>-agents`
 2. Store project secrets in the vault
 3. Create the project's `.env.agent` with `op://` references
 4. Launch: `op run --env-file=.env.agent -- opencode`
 
-### Cloud:
+### Cloud
 1. Install the OpenCode GitHub App on the repo
 2. Add `ANTHROPIC_API_KEY` (or your LLM key) as a GitHub Actions secret
 3. Copy the `opencode.yml` workflow into `.github/workflows/`
