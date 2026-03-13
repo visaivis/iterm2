@@ -61,7 +61,7 @@ If you're setting this up for the first time, run through these steps in order:
 # 3. Store the PAT in the vault (via 1password.com UI)
 # 4. Create a 1Password service account scoped to the vault (via 1password.com UI)
 # 5. Create a dedicated keychain for agent secrets:
-security create-keychain -p "" agent-secrets.keychain-db
+security create-keychain -P agent-secrets.keychain-db
 
 # 6. Store the service account token in the dedicated keychain:
 security add-generic-password -a "op-service-account" -s "iterm2-agents" -w agent-secrets.keychain-db
@@ -168,10 +168,10 @@ Service accounts restrict CLI access to specific vaults. The agent authenticates
 Agents should not have access to your login keychain (which contains Wi-Fi passwords, browser certificates, and other personal credentials). Create a dedicated keychain that holds only agent secrets:
 
 ```bash
-security create-keychain -p "" agent-secrets.keychain-db
+security create-keychain -P agent-secrets.keychain-db
 ```
 
-This creates an empty, unlocked keychain file at `~/Library/Keychains/agent-secrets.keychain-db`. The `-p ""` sets an empty password — the keychain is protected by macOS file permissions, and the secrets inside are still encrypted.
+The `-P` flag prompts you for a password via the macOS SecurityAgent dialog (never visible in shell history or process lists). This creates an encrypted keychain file at `~/Library/Keychains/agent-secrets.keychain-db`.
 
 ## Step 6: Store the Service Account Token
 
@@ -320,7 +320,7 @@ If the dedicated keychain is locked, unlock it first:
 ```bash
 security unlock-keychain agent-secrets.keychain-db
 ```
-The keychain created with `-p ""` should remain unlocked during your session, but macOS may lock it after a reboot or timeout.
+The keychain locks after a reboot or timeout. Unlock it with the password you set during creation.
 
 ### Agent can push to `main` unexpectedly
 The agent PAT should belong to a non-admin user, or the branch ruleset should block non-bypass actors. Verify:
