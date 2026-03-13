@@ -71,8 +71,10 @@ triage → approved → in-progress → pr-submitted → (closed)
 - `.github/ISSUE_LIFECYCLE.md` — Label definitions and state transitions
 
 Key rules:
+- **NEVER approve your own issues** — moving an issue from `triage` to `approved` is exclusively a human action. The agent must not apply the `approved` label under any circumstance.
+- **NEVER merge your own PRs** — merging is exclusively a human action. The agent must not merge, auto-merge, or request auto-merge on any PR it created.
+- **NEVER approve your own PRs** — the agent must not submit approving reviews on its own PRs.
 - Only work on issues labeled `approved` (the human Overseer gate)
 - Branch pattern: `agent/<issue-number>-<short-slug>`
 - Validate locally before pushing (ShellCheck, zsh -n, JSON, dry-run install)
 - PRs must link the issue with `Closes #N` and include co-author attribution
-- Never merge your own PRs or create releases
