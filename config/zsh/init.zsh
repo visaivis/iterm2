@@ -24,6 +24,10 @@ if [[ -z "$POWERLEVEL9K_VERSION" ]]; then
   unset _p10k_theme
 fi
 
+# 4a. Powerlevel10k configuration (user's or our bundled default)
+# The p10k theme does not auto-source this; it must be loaded explicitly.
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
+
 # 5. Powerlevel10k overlay (theme-matched colors, transient prompt)
 source "$MODERN_TERMINAL_DIR/p10k-overlay.zsh"
 
