@@ -39,6 +39,7 @@ SKIP_GIT=false
 SKIP_PLUGINS=false
 SKIP_ALIASES=false
 SKIP_OPENCODE=false
+SKIP_ITERM_AI=false
 
 # =============================================================================
 # Helpers
@@ -101,6 +102,7 @@ ${BOLD}Options:${NC}
   --skip-plugins    Skip zsh plugin loading (use existing plugins)
   --skip-aliases    Skip modern CLI aliases (keep existing aliases)
   --skip-opencode   Skip OpenCode theme configuration
+  --skip-iterm-ai   Skip iTerm2 AI plugin configuration
   -h, --help        Show this help message
 
 ${BOLD}What it does:${NC}
@@ -139,6 +141,7 @@ while [[ $# -gt 0 ]]; do
     --skip-plugins)   SKIP_PLUGINS=true ;;
     --skip-aliases)   SKIP_ALIASES=true ;;
     --skip-opencode)  SKIP_OPENCODE=true ;;
+    --skip-iterm-ai)  SKIP_ITERM_AI=true ;;
     -h|--help)        usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
@@ -572,7 +575,40 @@ header "Setting up Powerlevel10k"
   fi
 
 # =============================================================================
-# 7. OpenCode Theme Configuration
+# 7. iTerm2 AI Plugin Configuration
+# =============================================================================
+
+if ! $SKIP_ITERM_AI; then
+  header "Configuring iTerm2 AI plugin"
+
+  if $DRY_RUN; then
+    info "Would configure iTerm2 AI settings via defaults write"
+    info "  Model: gpt-5.2, API: OpenAI Responses, all features enabled"
+    info "  Note: API key and consent must be set manually in iTerm2 → Settings → General → AI"
+  else
+    # AI model and API settings
+    defaults write com.googlecode.iterm2 AiModel -string "gpt-5.2"
+    defaults write com.googlecode.iterm2 AitermURL -string "https://api.openai.com/v1/responses"
+    defaults write com.googlecode.iterm2 AITermAPI -int 2
+    defaults write com.googlecode.iterm2 AiMaxTokens -int 400000
+    defaults write com.googlecode.iterm2 AiResponseMaxTokens -int 128000
+
+    # Enable all AI features
+    defaults write com.googlecode.iterm2 AIFeatureFunctionCalling -bool YES
+    defaults write com.googlecode.iterm2 AIFeatureStreamingResponses -bool YES
+    defaults write com.googlecode.iterm2 AIFeatureHostedCodeInterpeter -bool YES
+    defaults write com.googlecode.iterm2 AIFeatureHostedFileSearch -bool YES
+    defaults write com.googlecode.iterm2 AIFeatureHostedWebSearch -bool YES
+    defaults write com.googlecode.iterm2 AIVectorStore -int 0
+
+    log_action "DEFAULTS_WRITE com.googlecode.iterm2 AI settings"
+    ok "Configured iTerm2 AI plugin settings"
+    warn "API key and consent must be set manually: iTerm2 → Settings → General → AI"
+  fi
+fi
+
+# =============================================================================
+# 8. OpenCode Theme Configuration
 # =============================================================================
 
 if ! $SKIP_OPENCODE; then
