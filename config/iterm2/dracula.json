@@ -168,7 +168,10 @@
       "Minimum Contrast": 0.0,
       "Transparency": 0.0,
       "Blur": false,
-      "Copy to Clipboard on Selection": true
+      "Copy to Clipboard on Selection": true,
+
+      "Option Key Sends": 2,
+      "Right Option Key Sends": 0
     }
   ]
 }
