@@ -342,6 +342,7 @@ Because this is a required status check, the PR cannot be merged until it passes
 
 Git hooks in `.github/hooks/` catch mistakes before they reach CI:
 
+- **`pre-commit`**: Blocks direct commits on `main` (exceptions: merge commits, automated release commits)
 - **`commit-msg`**: Rejects commits that don't contain `Closes #N`, `Fixes #N`, `Resolves #N`, or `Refs #N`
 - **`pre-push`**: Rejects pushes from branches that don't match the naming convention (`agent/<number>-<slug>`, `feat/<slug>`, `fix/<slug>`, `docs/<slug>`, `chore/<slug>`)
 

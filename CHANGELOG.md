@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `pre-commit` git hook that blocks direct commits on `main`, enforcing the branch-and-PR workflow (#15)
+  - Exceptions: merge commits, automated release commits (`github-actions[bot]`), and `--no-verify`
+
 ## [1.9.4] - 2026-03-14
 
 ### Fixed
