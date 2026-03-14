@@ -128,7 +128,7 @@ Key rules:
 Issue linkage and approval are enforced at three layers:
 
 1. **Server-side** (`pr-gate.yml`) — Required status check that blocks merge if the PR doesn't link an approved issue. This is the real gate and cannot be bypassed.
-2. **Client-side** (git hooks) — `commit-msg` rejects commits without issue references; `pre-push` validates branch naming. These catch mistakes early but can be skipped with `--no-verify`.
+2. **Client-side** (git hooks) — `pre-commit` blocks direct commits on `main`; `commit-msg` rejects commits without issue references; `pre-push` validates branch naming. These catch mistakes early but can be skipped with `--no-verify`.
 3. **SDLC skill** — Agents are instructed to always create issues before PRs and follow the full lifecycle.
 
 To install git hooks after cloning:

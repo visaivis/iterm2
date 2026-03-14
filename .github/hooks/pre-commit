@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# pre-commit hook: Blocks direct commits on the main branch.
+#
+# Prevents accidental commits to main that bypass the SDLC workflow.
+# Exceptions:
+#   - Merge commits (git merge)
+#   - Automated release commits (auto-release.yml sets GIT_AUTHOR_NAME)
+#
+# Skip with: git commit --no-verify
+#
+# Install: bash .github/hooks/install.sh
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+# Allow detached HEAD (e.g. CI, rebase)
+if [ -z "$branch" ]; then
+  exit 0
+fi
+
+# Only gate the main branch
+if [ "$branch" != "main" ]; then
+  exit 0
+fi
+
+# Allow merge commits (git merge creates the commit automatically)
+if git rev-parse MERGE_HEAD >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Allow automated release commits from auto-release.yml
+if [ "$GIT_AUTHOR_NAME" = "github-actions[bot]" ]; then
+  exit 0
+fi
+
+echo "ERROR: Direct commits to 'main' are not allowed."
+echo ""
+echo "  The SDLC workflow requires all changes to go through a feature branch and PR."
+echo ""
+echo "  Create a branch first:"
+echo "    git checkout -b agent/<issue-number>-<slug>"
+echo "    git checkout -b feat/<slug>"
+echo "    git checkout -b fix/<slug>"
+echo ""
+echo "  To skip this check: git commit --no-verify"
+exit 1
