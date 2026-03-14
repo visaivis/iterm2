@@ -164,7 +164,7 @@ import json, os
 path, profile = os.environ["OC_PATH"], os.environ["OC_PROFILE"]
 with open(path) as f:
     d = json.load(f)
-d.setdefault("providers", {}).setdefault("amazon-bedrock", {})["profile"] = profile
+d.setdefault("provider", {}).setdefault("amazon-bedrock", {}).setdefault("options", {})["profile"] = profile
 with open(path, "w") as f:
     json.dump(d, f, indent=2)
     f.write("\n")
