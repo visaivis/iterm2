@@ -34,7 +34,6 @@ DRY_RUN=false
 SKIP_BREW=false
 SKIP_ZSH=false
 SKIP_ITERM=false
-SKIP_P10K=false
 SKIP_TMUX=false
 SKIP_GIT=false
 SKIP_PLUGINS=false
@@ -96,7 +95,6 @@ ${BOLD}Options:${NC}
   --skip-brew       Skip Homebrew package installation
   --skip-zsh        Skip zsh configuration (plugins, aliases, fzf)
   --skip-iterm      Skip iTerm2 Dynamic Profile installation
-  --skip-p10k       Skip Powerlevel10k overlay
   --skip-tmux       Skip tmux configuration
   --skip-git        Skip git/delta configuration
   --skip-plugins    Skip zsh plugin loading (use existing plugins)
@@ -134,7 +132,6 @@ while [[ $# -gt 0 ]]; do
     --skip-brew)      SKIP_BREW=true ;;
     --skip-zsh)       SKIP_ZSH=true ;;
     --skip-iterm)     SKIP_ITERM=true ;;
-    --skip-p10k)      SKIP_P10K=true ;;
     --skip-tmux)      SKIP_TMUX=true ;;
     --skip-git)       SKIP_GIT=true ;;
     --skip-plugins)   SKIP_PLUGINS=true ;;
@@ -205,11 +202,9 @@ if ! $SKIP_ZSH && ! $SKIP_PLUGINS; then
 fi
 
 # Competing prompt themes
-if ! $SKIP_P10K; then
-  scan_file_for_pattern "$ZSHRC" "oh-my-zsh" "competing prompt: oh-my-zsh" "manual: remove oh-my-zsh theme"
-  scan_file_for_pattern "$ZSHRC" 'eval.*starship' "competing prompt: starship" "manual: remove starship init"
-  scan_file_for_pattern "$ZSHRC" "prompt pure" "competing prompt: pure" "manual: remove pure prompt"
-fi
+scan_file_for_pattern "$ZSHRC" "oh-my-zsh" "competing prompt: oh-my-zsh" "manual: remove oh-my-zsh theme"
+scan_file_for_pattern "$ZSHRC" 'eval.*starship' "competing prompt: starship" "manual: remove starship init"
+scan_file_for_pattern "$ZSHRC" "prompt pure" "competing prompt: pure" "manual: remove pure prompt"
 
 # Alias collisions
 if ! $SKIP_ZSH && ! $SKIP_ALIASES; then
@@ -313,7 +308,7 @@ $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Append source line to: ${DIM}$ZSHRC$
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Symlink tmux config: ${DIM}~/.tmux.conf → $SCRIPT_DIR/config/tmux/tmux.conf${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Install TPM (Tmux Plugin Manager)"
 $SKIP_GIT    || echo -e "  ${GREEN}▸${NC} Git delta config: ${DIM}~/.modern-terminal/git/delta.gitconfig${NC}"
-$SKIP_P10K   || echo -e "  ${GREEN}▸${NC} Set up Powerlevel10k prompt theme"
+echo -e "  ${GREEN}▸${NC} Set up Powerlevel10k prompt theme (Dracula)"
 echo -e "  ${GREEN}▸${NC} Backups saved to: ${DIM}$BACKUP_DIR${NC}"
 echo ""
 
@@ -333,7 +328,7 @@ if ! $DRY_RUN; then
   MANIFEST="$BACKUP_DIR/manifest.log"
   echo "# Modern Terminal Install Manifest - $TIMESTAMP" > "$MANIFEST"
   echo "# Script: $SCRIPT_DIR/install.sh" >> "$MANIFEST"
-  echo "# Flags: dry_run=$DRY_RUN skip_brew=$SKIP_BREW skip_zsh=$SKIP_ZSH skip_iterm=$SKIP_ITERM skip_p10k=$SKIP_P10K skip_tmux=$SKIP_TMUX skip_git=$SKIP_GIT" >> "$MANIFEST"
+  echo "# Flags: dry_run=$DRY_RUN skip_brew=$SKIP_BREW skip_zsh=$SKIP_ZSH skip_iterm=$SKIP_ITERM skip_tmux=$SKIP_TMUX skip_git=$SKIP_GIT" >> "$MANIFEST"
   echo "" >> "$MANIFEST"
 fi
 
@@ -539,8 +534,7 @@ fi
 # 6. Powerlevel10k Setup
 # =============================================================================
 
-if ! $SKIP_P10K; then
-  header "Setting up Powerlevel10k"
+header "Setting up Powerlevel10k"
 
   P10K_BREW_PREFIX="$(brew --prefix 2>/dev/null)"
   P10K_THEME="${P10K_BREW_PREFIX}/share/powerlevel10k/powerlevel10k.zsh-theme"
@@ -554,33 +548,25 @@ if ! $SKIP_P10K; then
 
     P10K_CONFIG="$HOME/.p10k.zsh"
     P10K_DEFAULT="$SCRIPT_DIR/config/zsh/p10k-default.zsh"
-    if [[ -f "$P10K_CONFIG" ]]; then
-      ok "Existing p10k config found: ~/.p10k.zsh"
+    if [[ -f "$P10K_DEFAULT" ]]; then
       if $DRY_RUN; then
-        info "Your existing p10k configuration will be preserved."
-        info "The overlay (p10k-overlay.zsh) will add theme-matched enhancements."
+        if [[ -f "$P10K_CONFIG" ]]; then
+          info "Would backup existing ~/.p10k.zsh and replace with repo Dracula default."
+        else
+          info "Would install Dracula p10k config from repo → ~/.p10k.zsh"
+        fi
       else
-        info "Your existing p10k configuration has been preserved."
-        info "The overlay adds transient prompt and theme-matched colors on top."
-        info "Use ${DIM}--skip-p10k${NC} to disable the overlay if you prefer your original look."
+        backup_file "$P10K_CONFIG"
+        cp "$P10K_DEFAULT" "$P10K_CONFIG"
+        log_action "COPY $P10K_DEFAULT $P10K_CONFIG"
+        ok "Installed p10k config (Dracula): ~/.p10k.zsh"
+        info "Customize later with: ${BOLD}p10k configure${NC}"
       fi
     else
-      if $DRY_RUN; then
-        info "No ~/.p10k.zsh found. Would install default config from repo."
-      else
-        if [[ -f "$P10K_DEFAULT" ]]; then
-          cp "$P10K_DEFAULT" "$P10K_CONFIG"
-          log_action "COPY $P10K_DEFAULT $P10K_CONFIG"
-          ok "Installed default p10k config to ~/.p10k.zsh (nerdfont-v3 + MesloLGS NF)"
-          info "Customize later with: ${BOLD}p10k configure${NC}"
-        else
-          warn "Default p10k config not found at $P10K_DEFAULT"
-          info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
-        fi
-      fi
+      warn "Default p10k config not found at $P10K_DEFAULT"
+      info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
     fi
   fi
-fi
 
 # =============================================================================
 # Summary
@@ -592,15 +578,10 @@ if $DRY_RUN; then
   info "This was a dry run. No changes were made."
   info "Run without --dry-run to apply changes."
 else
-  P10K_NEXT=""
-  if ! $SKIP_P10K && [[ ! -f "$HOME/.p10k.zsh" ]]; then
-    P10K_NEXT="\n  ${BOLD}2.${NC} Configure your prompt: ${DIM}p10k configure${NC}"
-  fi
-
   echo -e "
   ${GREEN}${BOLD}What's next:${NC}
 
-  ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})${P10K_NEXT}
+  ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})
   ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Dracula${NC} profile:
      Settings → Profiles → select 'Dracula' → set as Default
   ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}

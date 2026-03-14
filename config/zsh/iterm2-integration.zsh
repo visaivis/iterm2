@@ -1,10 +1,11 @@
 # iTerm2 Shell Integration
-# Enables command marks, captured output, and automatic profile switching.
-# Only loads when running inside iTerm2 (not in other terminals or tmux plain mode).
-
-if [[ "$TERM_PROGRAM" == "iTerm.app" || -n "$ITERM_SESSION_ID" ]]; then
-  ITERM2_INTEGRATION="$HOME/.iterm2_shell_integration.zsh"
-  if [[ -f "$ITERM2_INTEGRATION" ]]; then
-    source "$ITERM2_INTEGRATION"
-  fi
-fi
+# p10k has native iTerm2 shell integration (command marks, captured output,
+# automatic profile switching) enabled via POWERLEVEL9K_TERM_SHELL_INTEGRATION.
+# Do NOT source ~/.iterm2_shell_integration.zsh alongside p10k — doing so
+# injects a visible '>' caret before the prompt.
+#
+# POWERLEVEL9K_TERM_SHELL_INTEGRATION is set in p10k-overlay.zsh.
+#
+# Utilities like `imgcat` and `it2dl` that ship with the standalone integration
+# can still be loaded separately if needed by sourcing only the utilities file:
+#   source "$HOME/.iterm2_shell_integration.zsh" --only-utilities
