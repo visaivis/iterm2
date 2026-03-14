@@ -45,15 +45,15 @@ if [[ -f "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting
   # Theme-matched highlighter colors
   ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
   typeset -A ZSH_HIGHLIGHT_STYLES
-  ZSH_HIGHLIGHT_STYLES[command]='fg=#a1b56c'           # Green - valid commands
-  ZSH_HIGHLIGHT_STYLES[builtin]='fg=#a1b56c'           # Green - builtins
-  ZSH_HIGHLIGHT_STYLES[alias]='fg=#a1b56c'             # Green - aliases
-  ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ab4642'     # Red - invalid commands
-  ZSH_HIGHLIGHT_STYLES[path]='fg=#7cafc2,underline'    # Blue - file paths
-  ZSH_HIGHLIGHT_STYLES[globbing]='fg=#f7ca88'          # Yellow - globs
-  ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#f7ca88'  # Yellow
-  ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#f7ca88'  # Yellow
-  ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#f7ca88'  # Yellow
-  ZSH_HIGHLIGHT_STYLES[comment]='fg=#585858'           # Dimmed comments
-  ZSH_HIGHLIGHT_STYLES[arg0]='fg=#a1b56c'              # Green - first word
+  ZSH_HIGHLIGHT_STYLES[command]='fg=#50fa7b'           # Dracula Green - valid commands
+  ZSH_HIGHLIGHT_STYLES[builtin]='fg=#50fa7b'           # Dracula Green - builtins
+  ZSH_HIGHLIGHT_STYLES[alias]='fg=#50fa7b'             # Dracula Green - aliases
+  ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#ff5555'     # Dracula Red - invalid commands
+  ZSH_HIGHLIGHT_STYLES[path]='fg=#8be9fd,underline'    # Dracula Cyan - file paths
+  ZSH_HIGHLIGHT_STYLES[globbing]='fg=#f1fa8c'          # Dracula Yellow - globs
+  ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#f1fa8c'  # Dracula Yellow
+  ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#f1fa8c'  # Dracula Yellow
+  ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=#f1fa8c'  # Dracula Yellow
+  ZSH_HIGHLIGHT_STYLES[comment]='fg=#6272a4'           # Dracula Comment
+  ZSH_HIGHLIGHT_STYLES[arg0]='fg=#50fa7b'              # Dracula Green - first word
 fi
