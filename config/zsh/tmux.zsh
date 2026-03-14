@@ -11,47 +11,37 @@ alias tcc='tmux -CC new-session -A -s dev'
 
 # --- AI development workspace ---
 # Creates a tmux session with a 2-pane layout:
-#   ┌────────────────────────────────┐
-#   │                                │
-#   │         opencode (80%)         │
-#   │                                │
-#   ├────────────────────────────────┤
-#   │      terminal / shell (20%)    │
-#   └────────────────────────────────┘
+#   ┌─────────────────────────────────┐
+#   │                                 │
+#   │         opencode AI TUI         │
+#   │            (80%)                │
+#   │                                 │
+#   ├─────────────────────────────────┤
+#   │        terminal (20%)           │
+#   └─────────────────────────────────┘
 ai-workspace() {
   local session_name="${1:-ai-dev}"
   local project_dir="${2:-$(pwd)}"
 
-  # If session exists, just attach (and fix layout)
+  # If session exists, kill it and recreate with the correct layout
   if tmux has-session -t "$session_name" 2>/dev/null; then
-    echo "Attaching to existing session: $session_name"
-    ai-layout-fix "$session_name" 2>/dev/null
-    tmux attach-session -t "$session_name"
-    return
+    tmux kill-session -t "$session_name"
   fi
 
   echo "Creating AI workspace: $session_name (in $project_dir)"
 
-  # Create session — top pane for opencode
-  tmux new-session -d -s "$session_name" -c "$project_dir"
-
-  # Split bottom for terminal (20% height)
-  # Note: after split, panes are .1 (top) and .2 (bottom) due to pane-base-index=1
-  tmux split-window -v -p 20 -t "$session_name" -c "$project_dir"
-
-  # Explicitly set vertical layout and enforce 80/20 proportions
-  tmux select-layout -t "$session_name" main-horizontal
-  tmux resize-pane -t "$session_name:.2" -y 20%
-
-  # Start opencode in the top pane (.1)
+  # Create session — top pane runs opencode directly
   if command -v opencode &>/dev/null; then
-    tmux send-keys -t "$session_name:.1" 'opencode' C-m
+    tmux new-session -d -s "$session_name" -c "$project_dir" 'opencode'
   else
-    tmux send-keys -t "$session_name:.1" 'echo "opencode not installed - run: brew install anomalyco/tap/opencode"' C-m
+    tmux new-session -d -s "$session_name" -c "$project_dir"
   fi
 
-  # Focus the bottom terminal pane (.2)
-  tmux select-pane -t "$session_name:.2"
+  # Split bottom for terminal (20% height)
+  tmux split-window -v -p 20 -t "$session_name" -c "$project_dir"
+
+  # Focus the bottom terminal pane
+  tmux select-pane -t "$session_name:.1"
 
   # Attach
   tmux attach-session -t "$session_name"
