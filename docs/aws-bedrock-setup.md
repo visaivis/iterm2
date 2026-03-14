@@ -10,7 +10,7 @@ The installer automatically:
 1. Installs `~/bin/bedrock-auth` — your SSO authentication helper
 2. Bootstraps `~/.aws/config` with the `WFS-Architects-RD` profile and `my-sso` session
 3. Installs `~/.config/opencode/opencode.json` pre-configured to use `amazon-bedrock`
-4. Adds `bedrock-login`, `bedrock-logout`, and `bedrock-status` shell aliases
+4. Adds `bedrock-login`, `bedrock-select`, `bedrock-logout`, and `bedrock-status` shell aliases
 
 ---
 
@@ -31,7 +31,17 @@ bedrock-login
 
 This opens your browser to the Microsoft Entra ID SSO portal. Approve the login request, then return to your terminal. Your session is cached for 8 hours.
 
+After login, `bedrock-auth` automatically fetches all AWS accounts your identity has access to and presents an interactive picker. Select the account and role you want to work with:
+
+- If you have **fzf** installed (default — it's in the Brewfile), you get a fuzzy search picker.
+- Otherwise, a numbered list is shown.
+
+The chosen account is written to `~/.aws/config` as a named profile, saved to `~/.aws/active_profile` (so new terminal windows pick it up automatically), and the OpenCode config is updated.
+
 ```sh
+# Re-select account/role without re-logging in (session still valid)
+bedrock-select
+
 # Check auth status
 bedrock-status
 
@@ -39,7 +49,7 @@ bedrock-status
 bedrock-logout
 ```
 
-The `~/bin/bedrock-auth` script manages SSO authentication against the `WFS-Architects-RD` profile (`my-sso` session, account `711387094947`, role `WFSPowerUserAccess`). The installer bootstraps `~/.aws/config` automatically — you should not need to edit it manually.
+> **Tip:** To activate the selected profile in your **current** shell session, run the `export` command printed at the end of `bedrock-select`. New terminal windows pick it up automatically from `~/.aws/active_profile`.
 
 ---
 
@@ -131,8 +141,9 @@ If missing, copy it from `config/opencode/opencode.json` in this repo.
 
 ```sh
 # Authentication
-bedrock-login              # Authenticate via Microsoft Entra ID SSO
-bedrock-status             # Check current auth status
+bedrock-login              # Authenticate via Microsoft Entra ID SSO + pick account
+bedrock-select             # Re-pick account/role (reuses valid SSO session)
+bedrock-status             # Check current AWS identity and session state
 bedrock-logout             # Clear SSO session
 
 # OpenCode
