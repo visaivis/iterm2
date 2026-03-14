@@ -57,7 +57,7 @@ jobs:
 
       - name: Verify config files exist
         run: |
-          test -f config/iterm2/modern-dark.json
+          test -f config/iterm2/dracula.json
           test -f config/tmux/tmux.conf
           test -f config/git/delta.gitconfig
           ls config/zsh/*.zsh | wc -l | grep -q '[1-9]'

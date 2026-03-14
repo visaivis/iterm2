@@ -95,7 +95,7 @@ graph LR
 ~/.tmux/plugins/tpm/              ← TPM (cloned at install time)
 ~/.gitconfig                      ← [include] path added for delta
 ~/.iterm2_shell_integration.zsh   ← downloaded at install time
-~/Library/Application Support/iTerm2/DynamicProfiles/modern-dark.json
+~/Library/Application Support/iTerm2/DynamicProfiles/dracula.json
 
 ~/.terminal-config-backup/
   └── 20240101_120000/

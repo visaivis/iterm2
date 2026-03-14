@@ -14,7 +14,7 @@ A reproducible, one-command setup for a polished iTerm2 + zsh development enviro
 
 ## What You Get
 
-- **Dark theme** — curated color scheme across iTerm2, tmux, fzf, and git diffs
+- **Dracula theme** — [Dracula](https://draculatheme.com) color scheme across iTerm2, tmux, fzf, and git diffs
 - **Syntax highlighting** — commands colored as you type (green = valid, red = typo)
 - **Autosuggestions** — ghost-text completions from shell history
 - **Fuzzy everything** — Ctrl+R history search, Tab completion with previews, file finder
@@ -47,7 +47,7 @@ cd ~/personal/iterm2
 #    (if no p10k config exists, run: p10k configure)
 
 # 5. In iTerm2:
-#    Settings → Profiles → select "Modern Dark" → set as Default
+#    Settings → Profiles → select "Dracula" → set as Default
 
 # 6. Install tmux plugins (inside tmux)
 #    Press: Ctrl+a I
@@ -61,7 +61,7 @@ ai-workspace
 | Step | What | Reversible? |
 |---|---|---|
 | Brew packages | Installs tools + Powerlevel10k from `Brewfile` | `--remove-packages` on uninstall |
-| iTerm2 profile | Adds "Modern Dark" Dynamic Profile | Removed on uninstall |
+| iTerm2 profile | Adds "Dracula" Dynamic Profile | Removed on uninstall |
 | Zsh config | Symlinks `~/.modern-terminal/` + appends 1 line to `.zshrc` | Line removed, symlink deleted |
 | tmux config | Symlinks `~/.tmux.conf` + installs TPM | Symlink removed, original restored |
 | Git config | Adds `[include]` for delta | Include removed |
@@ -115,7 +115,7 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 | `~/.zshrc` | ✅ Fully | ZDOTDIR redirects to temp dir |
 | Aliases, plugins, fzf | ✅ Fully | Loaded from repo, not ~/.zshrc |
 | tmux config | ✅ Fully | Uses `-f` flag, no symlink created |
-| iTerm2 profile | ⚠️ Additive | Adds "Modern Dark" option, doesn't replace Default. Remove: `rm ~/Library/Application\ Support/iTerm2/DynamicProfiles/modern-dark.json` |
+| iTerm2 profile | ⚠️ Additive | Adds "Dracula" option, doesn't replace Default. Remove: `rm ~/Library/Application\ Support/iTerm2/DynamicProfiles/dracula.json` |
 | Brew packages | ⚠️ System-wide | Installs to /opt/homebrew — tools are inert until aliased |
 | p10k config | 🔗 Read-only | Uses your existing `~/.p10k.zsh` so the prompt renders correctly |
 
@@ -172,7 +172,7 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 │   │   ├── tmux.zsh             ← tmux + ai-workspace
 │   │   └── iterm2-integration.zsh
 │   ├── iterm2/
-│   │   └── modern-dark.json      ← Dynamic Profile
+│   └── dracula.json          ← Dynamic Profile
 │   ├── tmux/
 │   │   └── tmux.conf             ← tmux configuration
 │   └── git/

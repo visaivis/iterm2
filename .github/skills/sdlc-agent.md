@@ -17,7 +17,7 @@ Before writing any code, fully understand the work:
    - Shell scripts: `install.sh`, `uninstall.sh`, `test.sh`
    - Zsh configs: `config/zsh/*.zsh`
    - Tmux config: `config/tmux/tmux.conf`
-   - iTerm2 profile: `config/iterm2/modern-dark.json`
+   - iTerm2 profile: `config/iterm2/dracula.json`
    - Git config: `config/git/delta.gitconfig`
    - Brew deps: `Brewfile`
    - Docs: `README.md`, `docs/*.md`
@@ -82,7 +82,7 @@ git checkout -b agent/<number>-<slug>
 - Follow the modular pattern: one feature per file in `config/zsh/`
 - Source new files from `config/zsh/init.zsh`
 
-**JSON** (`modern-dark.json`):
+**JSON** (`dracula.json`):
 - Must be valid JSON (`python3 -m json.tool`)
 - Preserve the existing structure and key ordering
 
@@ -166,7 +166,7 @@ shellcheck install.sh uninstall.sh test.sh
 for f in config/zsh/*.zsh; do zsh -n "$f"; done
 
 # 3. JSON validation
-python3 -m json.tool config/iterm2/modern-dark.json > /dev/null
+python3 -m json.tool config/iterm2/dracula.json > /dev/null
 
 # 4. Dry-run install (catches path/logic errors)
 bash install.sh --dry-run
@@ -211,7 +211,7 @@ Closes #<issue-number>
 
 - [x] ShellCheck passes on modified `.sh` files
 - [x] `zsh -n` passes on modified `.zsh` files
-- [x] JSON validates for `modern-dark.json`
+- [x] JSON validates for `dracula.json`
 - [x] `bash install.sh --dry-run` succeeds
 - [x] `bash test.sh` passes in sandbox
 - [x] CHANGELOG.md updated under [Unreleased]

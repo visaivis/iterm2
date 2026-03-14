@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate iTerm2 profile JSON
-        run: python3 -m json.tool config/iterm2/modern-dark.json > /dev/null
+        run: python3 -m json.tool config/iterm2/dracula.json > /dev/null
 
   markdown-lint:
     name: Markdown Lint

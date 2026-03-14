@@ -307,7 +307,7 @@ header "Installation Plan"
 
 echo -e "  The following changes will be made:\n"
 $SKIP_BREW   || echo -e "  ${GREEN}▸${NC} Install CLI tools via Homebrew (Brewfile)"
-$SKIP_ITERM  || echo -e "  ${GREEN}▸${NC} Add iTerm2 Dynamic Profile: ${DIM}Modern Dark${NC}"
+$SKIP_ITERM  || echo -e "  ${GREEN}▸${NC} Add iTerm2 Dynamic Profile: ${DIM}Dracula${NC}"
 $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Symlink zsh config: ${DIM}$CONFIG_DIR → $SCRIPT_DIR/config/zsh${NC}"
 $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Append source line to: ${DIM}$ZSHRC${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Symlink tmux config: ${DIM}~/.tmux.conf → $SCRIPT_DIR/config/tmux/tmux.conf${NC}"
@@ -360,15 +360,15 @@ fi
 
 if ! $SKIP_ITERM; then
   header "Installing iTerm2 Dynamic Profile"
-  profile_dest="$ITERM_PROFILES_DIR/modern-dark.json"
+  profile_dest="$ITERM_PROFILES_DIR/dracula.json"
   if $DRY_RUN; then
-    info "Would copy: $SCRIPT_DIR/config/iterm2/modern-dark.json → $profile_dest"
+    info "Would copy: $SCRIPT_DIR/config/iterm2/dracula.json → $profile_dest"
   else
     backup_file "$profile_dest"
     mkdir -p "$ITERM_PROFILES_DIR"
-    cp "$SCRIPT_DIR/config/iterm2/modern-dark.json" "$profile_dest"
-    log_action "COPY $SCRIPT_DIR/config/iterm2/modern-dark.json $profile_dest"
-    ok "Dynamic Profile installed (select 'Modern Dark' in iTerm2 → Profiles)"
+    cp "$SCRIPT_DIR/config/iterm2/dracula.json" "$profile_dest"
+    log_action "COPY $SCRIPT_DIR/config/iterm2/dracula.json $profile_dest"
+    ok "Dynamic Profile installed (select 'Dracula' in iTerm2 → Profiles)"
   fi
 fi
 
@@ -601,8 +601,8 @@ else
   ${GREEN}${BOLD}What's next:${NC}
 
   ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})${P10K_NEXT}
-  ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Modern Dark${NC} profile:
-     Settings → Profiles → select 'Modern Dark' → set as Default
+  ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Dracula${NC} profile:
+     Settings → Profiles → select 'Dracula' → set as Default
   ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
 
   ${BOLD}Backups:${NC} $BACKUP_DIR

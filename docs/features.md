@@ -1,13 +1,15 @@
 # Features
 
-## Color Theme — Modern Dark
+## Color Theme — Dracula
 
-A curated dark iTerm2 profile with carefully tuned colors for readability and aesthetics.
+The [Dracula](https://draculatheme.com) color scheme, a popular dark theme known for its readability and vibrant colors.
 
-- **Background**: `#181818` (deep dark gray)
-- **Foreground**: `#d8d8d8` (soft white)
-- **Accent/Cursor**: `#7cafc2` (muted blue)
-- **Selection**: `#585858`
+- **Background**: `#282A36` (dark purple-gray)
+- **Foreground**: `#F8F8F2` (warm white)
+- **Cursor**: `#F8F8F2` (foreground)
+- **Selection**: `#44475A` (current line)
+- **Comment**: `#6272A4` (muted blue)
+- **Accent colors**: Purple `#BD93F9`, Pink `#FF79C6`, Green `#50FA7B`, Cyan `#8BE9FD`, Red `#FF5555`, Yellow `#F1FA8C`, Orange `#FFB86C`
 
 Installed as a Dynamic Profile — it doesn't replace your existing Default profile. Switch to it in iTerm2 → Settings → Profiles.
 
@@ -54,7 +56,7 @@ Previews:
 | `Ctrl+Y` (in Ctrl+R) | Copy selected command to clipboard |
 | `Ctrl+/` (in Ctrl+T) | Toggle file preview |
 
-Colors and layout are matched to the dark theme.
+Colors and layout are matched to the Dracula theme.
 
 ## tmux
 

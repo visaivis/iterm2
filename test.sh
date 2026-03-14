@@ -128,11 +128,11 @@ fi
 if $WITH_PROFILE; then
   header "Installing iTerm2 Dynamic Profile"
   profile_dir="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
-  profile_dest="$profile_dir/modern-dark.json"
+  profile_dest="$profile_dir/dracula.json"
   mkdir -p "$profile_dir"
-  cp "$SCRIPT_DIR/config/iterm2/modern-dark.json" "$profile_dest"
-  ok "Installed 'Modern Dark' profile"
-  info "Switch to it: iTerm2 → Settings → Profiles → Modern Dark"
+  cp "$SCRIPT_DIR/config/iterm2/dracula.json" "$profile_dest"
+  ok "Installed 'Dracula' profile"
+  info "Switch to it: iTerm2 → Settings → Profiles → Dracula"
   info "To remove later: rm \"$profile_dest\""
 fi
 

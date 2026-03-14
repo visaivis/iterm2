@@ -129,7 +129,7 @@ header "Uninstall Plan"
 echo -e "  The following changes will be made:\n"
 echo -e "  ${RED}▸${NC} Remove source line from ~/.zshrc"
 echo -e "  ${RED}▸${NC} Remove symlink: ~/.modern-terminal"
-echo -e "  ${RED}▸${NC} Remove iTerm2 Dynamic Profile: Modern Dark"
+echo -e "  ${RED}▸${NC} Remove iTerm2 Dynamic Profile: Dracula"
 echo -e "  ${RED}▸${NC} Remove symlink: ~/.tmux.conf (if ours)"
 echo -e "  ${RED}▸${NC} Remove delta include from ~/.gitconfig"
 echo -e "  ${GREEN}▸${NC} Restore backed-up files from: ${DIM}$BACKUP_DIR${NC}"
@@ -191,13 +191,13 @@ fi
 
 header "Removing iTerm2 Dynamic Profile"
 
-profile_file="$ITERM_PROFILES_DIR/modern-dark.json"
+profile_file="$ITERM_PROFILES_DIR/dracula.json"
 if [[ -f "$profile_file" ]]; then
   if $DRY_RUN; then
     info "Would remove: $profile_file"
   else
     rm -f "$profile_file"
-    ok "Removed: Modern Dark profile"
+    ok "Removed: Dracula profile"
   fi
 else
   ok "Profile already removed"
