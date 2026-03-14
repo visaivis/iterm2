@@ -49,9 +49,9 @@ This project supports two agent execution modes that share the same vault-per-pr
 
 ```mermaid
 flowchart TB
-    subgraph "1Password Cloud (E2E encrypted)"
-        V["1Password Vault\niterm2-agents"]
-        S1["GH_TOKEN\n(fine-grained PAT)"]
+    subgraph cloud["1Password Cloud (E2E encrypted)"]
+        V["1Password Vault<br/>iterm2-agents"]
+        S1["GH_TOKEN<br/>(fine-grained PAT)"]
         S2["SOME_API_KEY"]
         S3["...future secrets"]
         V --> S1
@@ -59,31 +59,31 @@ flowchart TB
         V --> S3
     end
 
-    subgraph "Local Agent (your machine)"
-        APP["1Password Desktop App\n(Touch ID / biometric)"]
-        OP["op run\n(resolves op:// refs)"]
-        ENV[".env.agent\n(op:// references only)"]
-        AGENT_L["Agent Process\n(opencode / warp)"]
-        CLI_L["CLI Tools\n(gh, git, curl)"]
+    subgraph local["Local Agent (your machine)"]
+        APP["1Password Desktop App<br/>(Touch ID / biometric)"]
+        OP["op run<br/>(resolves op:// refs)"]
+        ENV[".env.agent<br/>(op:// references only)"]
+        AGENT_L["Agent Process<br/>(opencode / warp)"]
+        CLI_L["CLI Tools<br/>(gh, git, curl)"]
     end
 
-    subgraph "Cloud Agent (GitHub runner)"
-        GHS["GitHub Actions Secrets\n(ANTHROPIC_API_KEY)"]
-        OC["OpenCode GitHub Action\n(anomalyco/opencode/github)"]
-        AGENT_C["Agent Process\n(opencode on runner)"]
-        CLI_C["CLI Tools\n(gh, git)"]
+    subgraph runner["Cloud Agent (GitHub runner)"]
+        GHS["GitHub Actions Secrets<br/>(ANTHROPIC_API_KEY)"]
+        OC["OpenCode GitHub Action<br/>(anomalyco/opencode/github)"]
+        AGENT_C["Agent Process<br/>(opencode on runner)"]
+        CLI_C["CLI Tools<br/>(gh, git)"]
     end
 
-    subgraph "GitHub (remote)"
-        GH["GitHub API\n(repos, issues, PRs)"]
-        RS["Branch Ruleset\n(blocks direct push to main)"]
-        GHAPP["OpenCode GitHub App\n(installation token)"]
+    subgraph remote["GitHub (remote)"]
+        GH["GitHub API<br/>(repos, issues, PRs)"]
+        RS["Branch Ruleset<br/>(blocks direct push to main)"]
+        GHAPP["OpenCode GitHub App<br/>(installation token)"]
     end
 
     APP -->|"biometric unlock"| OP
-    OP -->|"authenticates via\ndesktop app"| V
+    OP -->|"authenticates via<br/>desktop app"| V
     ENV -->|"op:// references"| OP
-    OP -->|"env vars injected\ninto subprocess"| AGENT_L
+    OP -->|"env vars injected<br/>into subprocess"| AGENT_L
     AGENT_L --> CLI_L
     CLI_L -->|"GH_TOKEN in env"| GH
 
@@ -183,24 +183,24 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    subgraph RED["🔴 Untrusted: LLM Context"]
-        LLM["LLM inference\n(prompts, tool calls,\ncontext window)"]
+    subgraph RED["Untrusted: LLM Context"]
+        LLM["LLM inference<br/>(prompts, tool calls,<br/>context window)"]
     end
 
-    subgraph YELLOW["🟡 Controlled: Agent Process"]
-        PROC["Process env vars\n(GH_TOKEN, API keys)"]
-        TOOLS["CLI tools\n(gh, git)"]
+    subgraph YELLOW["Controlled: Agent Process"]
+        PROC["Process env vars<br/>(GH_TOKEN, API keys)"]
+        TOOLS["CLI tools<br/>(gh, git)"]
         PROC --> TOOLS
     end
 
-    subgraph GREEN["🟢 Trusted: Secret Stores"]
-        OP2["1Password Desktop App\n(biometric-gated)"]
-        GHS2["GitHub Actions Secrets\n(encrypted at rest)"]
+    subgraph GREEN["Trusted: Secret Stores"]
+        OP2["1Password Desktop App<br/>(biometric-gated)"]
+        GHS2["GitHub Actions Secrets<br/>(encrypted at rest)"]
     end
 
-    GREEN -->|"runtime injection\nvia op run (local)\nor $secrets.* (cloud)"| YELLOW
-    YELLOW -->|"tool output only\n(no raw secrets)"| RED
-    RED -.->|"❌ NO direct access\nto secrets"| GREEN
+    GREEN -->|"runtime injection<br/>via op run (local)<br/>or secrets.* (cloud)"| YELLOW
+    YELLOW -->|"tool output only<br/>(no raw secrets)"| RED
+    RED -.->|"NO direct access<br/>to secrets"| GREEN
 ```
 
 Key boundaries:
@@ -212,17 +212,17 @@ Key boundaries:
 
 ```mermaid
 flowchart TB
-    APP2["1Password Desktop App\n(single sign-in, Touch ID)"]
+    APP2["1Password Desktop App<br/>(single sign-in, Touch ID)"]
 
-    subgraph "Project A"
+    subgraph projectA["Project A"]
         V_A["Vault: project-a-agents"]
-        ENV_A[".env.agent\n(op://project-a-agents/...)"]
+        ENV_A[".env.agent<br/>(op://project-a-agents/...)"]
         A_AGENT["Agent A"]
     end
 
-    subgraph "Project B"
+    subgraph projectB["Project B"]
         V_B["Vault: project-b-agents"]
-        ENV_B[".env.agent\n(op://project-b-agents/...)"]
+        ENV_B[".env.agent<br/>(op://project-b-agents/...)"]
         B_AGENT["Agent B"]
     end
 
@@ -232,8 +232,8 @@ flowchart TB
     ENV_B -->|"scoped references"| V_B
     V_A --> A_AGENT
     V_B --> B_AGENT
-    V_A -.->|"❌ Agent A's .env.agent\ncannot reference"| V_B
-    V_B -.->|"❌ Agent B's .env.agent\ncannot reference"| V_A
+    V_A -.->|"Agent A's .env.agent<br/>cannot reference"| V_B
+    V_B -.->|"Agent B's .env.agent<br/>cannot reference"| V_A
 ```
 
 All projects share a single 1Password desktop app sign-in but use separate vaults. Each project's `.env.agent` contains `op://` references scoped to its own vault. An agent running in Project A has no references to Project B's vault — isolation is enforced by the `op://` URI scheme and vault permissions.
