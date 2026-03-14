@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.4] - 2026-03-14
+
 ### Fixed
 
 - Resolve iTerm2 escape sequence leakage (`1016;4$y...`) in `ai-workspace` by disabling unused tmux passthrough (#43)
