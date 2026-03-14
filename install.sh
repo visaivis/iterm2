@@ -40,6 +40,7 @@ SKIP_PLUGINS=false
 SKIP_ALIASES=false
 SKIP_OPENCODE=false
 SKIP_ITERM_AI=false
+SKIP_BEDROCK=false
 
 # =============================================================================
 # Helpers
@@ -68,7 +69,7 @@ confirm() {
 backup_file() {
   local file="$1"
   if [[ -f "$file" || -L "$file" ]]; then
-    local rel="${file#$HOME/}"
+    local rel="${file#"$HOME"/}"
     local dest="$BACKUP_DIR/$rel"
     if $DRY_RUN; then
       info "Would backup: $file → $dest"
@@ -103,6 +104,7 @@ ${BOLD}Options:${NC}
   --skip-aliases    Skip modern CLI aliases (keep existing aliases)
   --skip-opencode   Skip OpenCode theme configuration
   --skip-iterm-ai   Skip iTerm2 AI plugin configuration
+  --skip-bedrock    Skip AWS Bedrock SSO profile and auth script setup
   -h, --help        Show this help message
 
 ${BOLD}What it does:${NC}
@@ -142,6 +144,7 @@ while [[ $# -gt 0 ]]; do
     --skip-aliases)   SKIP_ALIASES=true ;;
     --skip-opencode)  SKIP_OPENCODE=true ;;
     --skip-iterm-ai)  SKIP_ITERM_AI=true ;;
+    --skip-bedrock)   SKIP_BEDROCK=true ;;
     -h|--help)        usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
@@ -313,7 +316,8 @@ $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Symlink zsh config: ${DIM}$CONFIG_DI
 $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Append source line to: ${DIM}$ZSHRC${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Symlink tmux config: ${DIM}~/.tmux.conf → $SCRIPT_DIR/config/tmux/tmux.conf${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Install TPM (Tmux Plugin Manager)"
-$SKIP_GIT    || echo -e "  ${GREEN}▸${NC} Git delta config: ${DIM}~/.modern-terminal/git/delta.gitconfig${NC}"
+$SKIP_GIT     || echo -e "  ${GREEN}▸${NC} Git delta config: ${DIM}~/.modern-terminal/git/delta.gitconfig${NC}"
+$SKIP_BEDROCK || echo -e "  ${GREEN}▸${NC} AWS Bedrock: SSO profile + ~/bin/bedrock-auth"
 echo -e "  ${GREEN}▸${NC} Set up Powerlevel10k prompt theme (Dracula)"
 echo -e "  ${GREEN}▸${NC} Backups saved to: ${DIM}$BACKUP_DIR${NC}"
 echo ""
@@ -331,11 +335,14 @@ fi
 
 if ! $DRY_RUN; then
   mkdir -p "$BACKUP_DIR"
+  chmod 700 "$BACKUP_DIR"
   MANIFEST="$BACKUP_DIR/manifest.log"
   echo "# Modern Terminal Install Manifest - $TIMESTAMP" > "$MANIFEST"
-  echo "# Script: $SCRIPT_DIR/install.sh" >> "$MANIFEST"
-  echo "# Flags: dry_run=$DRY_RUN skip_brew=$SKIP_BREW skip_zsh=$SKIP_ZSH skip_iterm=$SKIP_ITERM skip_tmux=$SKIP_TMUX skip_git=$SKIP_GIT" >> "$MANIFEST"
-  echo "" >> "$MANIFEST"
+  {
+    echo "# Script: $SCRIPT_DIR/install.sh"
+    echo "# Flags: dry_run=$DRY_RUN skip_brew=$SKIP_BREW skip_zsh=$SKIP_ZSH skip_iterm=$SKIP_ITERM skip_tmux=$SKIP_TMUX skip_git=$SKIP_GIT"
+    echo ""
+  } >> "$MANIFEST"
 fi
 
 # =============================================================================
@@ -453,9 +460,11 @@ if ! $SKIP_ZSH; then
     if grep -qF "$SOURCE_LINE" "$ZSHRC" 2>/dev/null; then
       ok "Source line already in .zshrc"
     else
-      echo "" >> "$ZSHRC"
-      echo "$SOURCE_COMMENT" >> "$ZSHRC"
-      echo "$SOURCE_LINE" >> "$ZSHRC"
+      {
+        echo ""
+        echo "$SOURCE_COMMENT"
+        echo "$SOURCE_LINE"
+      } >> "$ZSHRC"
       log_action "APPEND $ZSHRC $SOURCE_LINE"
       ok "Appended source line to .zshrc"
     fi
@@ -631,7 +640,9 @@ if ! $SKIP_OPENCODE; then
     else
       info "Would install: $OC_TUI_DEST (theme: dracula)"
     fi
-    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
+    if [[ -f "$OC_OPENCODE_DEST" ]]; then
+      info "Would backup existing $OC_OPENCODE_DEST and replace with server config"
+    else
       info "Would install: $OC_OPENCODE_DEST (base server config)"
     fi
   else
@@ -648,13 +659,85 @@ if ! $SKIP_OPENCODE; then
     log_action "COPY $OC_TUI_SRC $OC_TUI_DEST"
     ok "Installed OpenCode TUI config (theme: dracula): ~/.config/opencode/tui.json"
 
-    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
-      cp "$OC_OPENCODE_SRC" "$OC_OPENCODE_DEST"
-      log_action "COPY $OC_OPENCODE_SRC $OC_OPENCODE_DEST"
-      ok "Installed OpenCode server config: ~/.config/opencode/opencode.json"
+    backup_file "$OC_OPENCODE_DEST"
+    cp "$OC_OPENCODE_SRC" "$OC_OPENCODE_DEST"
+    log_action "COPY $OC_OPENCODE_SRC $OC_OPENCODE_DEST"
+    ok "Installed OpenCode server config: ~/.config/opencode/opencode.json"
+  fi
+fi
+
+# =============================================================================
+# 9. AWS Bedrock Setup
+# =============================================================================
+
+if ! $SKIP_BEDROCK; then
+  header "Setting up AWS Bedrock (SSO + auth script)"
+
+  AWS_CONFIG="$HOME/.aws/config"
+  SSO_SESSION_NAME="my-sso"
+  BEDROCK_PROFILE="WFS-Architects-RD"
+  BEDROCK_REGION="us-east-1"
+  BEDROCK_SCRIPT_SRC="$SCRIPT_DIR/scripts/bedrock-auth.sh"
+  BEDROCK_SCRIPT_DEST="$HOME/bin/bedrock-auth"
+
+  if $DRY_RUN; then
+    info "Would create ~/bin/ if missing"
+    info "Would install: $BEDROCK_SCRIPT_DEST"
+    if ! grep -q "\[sso-session ${SSO_SESSION_NAME}\]" "$AWS_CONFIG" 2>/dev/null; then
+      info "Would add [sso-session ${SSO_SESSION_NAME}] to ~/.aws/config"
     else
-      ok "opencode.json already exists — skipping (add providers/models manually)"
+      ok "SSO session '${SSO_SESSION_NAME}' already in ~/.aws/config"
     fi
+    if ! grep -q "\[profile ${BEDROCK_PROFILE}\]" "$AWS_CONFIG" 2>/dev/null; then
+      info "Would add [profile ${BEDROCK_PROFILE}] to ~/.aws/config"
+    else
+      ok "AWS profile '${BEDROCK_PROFILE}' already in ~/.aws/config"
+    fi
+    info "Run: bedrock-login  (after install, to authenticate via Microsoft Entra ID)"
+  else
+    # Install bedrock-auth script to ~/bin/
+    mkdir -p "$HOME/bin"
+    cp "$BEDROCK_SCRIPT_SRC" "$BEDROCK_SCRIPT_DEST"
+    chmod +x "$BEDROCK_SCRIPT_DEST"
+    log_action "COPY $BEDROCK_SCRIPT_SRC $BEDROCK_SCRIPT_DEST"
+    ok "Installed: ~/bin/bedrock-auth"
+
+    # Bootstrap ~/.aws/config if SSO session entry is missing
+    mkdir -p "$HOME/.aws"
+    chmod 700 "$HOME/.aws"
+    if ! grep -q "\[sso-session ${SSO_SESSION_NAME}\]" "$AWS_CONFIG" 2>/dev/null; then
+      cat >> "$AWS_CONFIG" <<AWSEOF
+
+[sso-session ${SSO_SESSION_NAME}]
+sso_start_url = https://wfscorp.awsapps.com/start
+sso_region = ${BEDROCK_REGION}
+sso_registration_scopes = sso:account:access
+AWSEOF
+      chmod 600 "$AWS_CONFIG"
+      log_action "AWSCONFIG sso-session ${SSO_SESSION_NAME}"
+      ok "Added SSO session '${SSO_SESSION_NAME}' to ~/.aws/config"
+    else
+      ok "SSO session '${SSO_SESSION_NAME}' already configured"
+    fi
+
+    # Bootstrap AWS profile entry if missing
+    if ! grep -q "\[profile ${BEDROCK_PROFILE}\]" "$AWS_CONFIG" 2>/dev/null; then
+      cat >> "$AWS_CONFIG" <<AWSEOF
+
+[profile ${BEDROCK_PROFILE}]
+sso_session = ${SSO_SESSION_NAME}
+sso_account_id = 711387094947
+sso_role_name = WFSPowerUserAccess
+region = ${BEDROCK_REGION}
+AWSEOF
+      chmod 600 "$AWS_CONFIG"
+      log_action "AWSCONFIG profile ${BEDROCK_PROFILE}"
+      ok "Added AWS profile '${BEDROCK_PROFILE}' to ~/.aws/config"
+    else
+      ok "AWS profile '${BEDROCK_PROFILE}' already configured"
+    fi
+
+    warn "Run ${BOLD}bedrock-login${NC} to authenticate via Microsoft Entra ID SSO"
   fi
 fi
 
@@ -672,6 +755,8 @@ else
   ${GREEN}${BOLD}What's next:${NC}
 
   ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})
+  ${BOLD}2.${NC} Authenticate with AWS Bedrock: ${DIM}bedrock-login${NC}
+     (opens browser for Microsoft Entra ID SSO)
   ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Dracula${NC} profile:
      Settings → Profiles → select 'Dracula' → set as Default
   ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}

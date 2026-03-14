@@ -34,5 +34,8 @@ source "$MODERN_TERMINAL_DIR/p10k-overlay.zsh"
 # 6. tmux aliases and AI workspace layouts
 source "$MODERN_TERMINAL_DIR/tmux.zsh"
 
-# 7. iTerm2 shell integration (must be near the end)
+# 7. AWS profile defaults and Bedrock helpers
+source "$MODERN_TERMINAL_DIR/aws.zsh"
+
+# 8. iTerm2 shell integration (must be near the end)
 source "$MODERN_TERMINAL_DIR/iterm2-integration.zsh"

@@ -21,7 +21,8 @@ A reproducible, one-command setup for a polished iTerm2 + zsh development enviro
 - **tmux with AI layout** — persistent sessions, `ai-workspace` opens coding + OpenCode + test panes
 - **Modern CLI tools** — `eza`, `bat`, `fd`, `ripgrep`, `zoxide`, `delta` aliased over defaults
 - **Powerlevel10k** — auto-installed, with transient prompt, theme-matched colors, command duration
-- **OpenCode CLI** — AI coding assistant in your terminal
+- **OpenCode CLI** — AI coding assistant in your terminal, pre-configured for AWS Bedrock
+- **AWS Bedrock** — default LLM provider via Microsoft Entra ID SSO, no API keys required
 
 ## Prerequisites
 
@@ -29,6 +30,7 @@ A reproducible, one-command setup for a polished iTerm2 + zsh development enviro
 - **[Homebrew](https://brew.sh)** — `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 - **[iTerm2](https://iterm2.com)** — `brew install --cask iterm2`
 - **zsh** (default on macOS)
+- **AWS CLI v2** — installed automatically via `Brewfile`; access to `WFS-Architects-RD` Bedrock account required
 
 ## Quick Start
 
@@ -52,7 +54,10 @@ cd ~/personal/iterm2
 # 6. Install tmux plugins (inside tmux)
 #    Press: Ctrl+a I
 
-# 7. Try the AI workspace
+# 7. Log in to AWS Bedrock (opens browser for Microsoft Entra ID SSO)
+bedrock-login
+
+# 8. Try the AI workspace
 ai-workspace
 ```
 
@@ -66,6 +71,7 @@ ai-workspace
 | tmux config | Symlinks `~/.tmux.conf` + installs TPM | Symlink removed, original restored |
 | Git config | Adds `[include]` for delta | Include removed |
 | Powerlevel10k | Verifies install, preserves existing `~/.p10k.zsh` | Theme stays installed; overlay removed with config |
+| AWS Bedrock | Installs `~/bin/bedrock-auth`, bootstraps `~/.aws/config`, copies OpenCode config | Skip with `--skip-bedrock` |
 
 Every modified file is backed up to `~/.terminal-config-backup/<timestamp>/`.
 
@@ -146,6 +152,7 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 ./install.sh --skip-iterm      # Skip iTerm2 profile
 ./install.sh --skip-p10k       # Skip p10k overlay
 ./install.sh --skip-git        # Skip delta config
+./install.sh --skip-bedrock    # Skip AWS Bedrock bootstrap
 ```
 
 ### Personal overrides
@@ -158,10 +165,13 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 ├── README.md                      ← You are here
 ├── docs/
 │   ├── architecture.md            ← Mermaid flow diagrams
-│   └── features.md                ← Feature details + keybindings
+│   ├── features.md                ← Feature details + keybindings
+│   └── aws-bedrock-setup.md       ← AWS Bedrock + OpenCode setup guide
 ├── install.sh                     ← Safe installer
 ├── uninstall.sh                   ← Full reversal
 ├── Brewfile                       ← Homebrew dependencies
+├── scripts/
+│   └── bedrock-auth.sh            ← AWS SSO auth helper (installed to ~/bin/bedrock-auth)
 ├── config/
 │   ├── zsh/                       ← Modular zsh config
 │   │   ├── init.zsh              ← Entry point
@@ -170,9 +180,12 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 │   │   ├── fzf.zsh              ← Fuzzy finder config
 │   │   ├── p10k-overlay.zsh     ← Prompt enhancements
 │   │   ├── tmux.zsh             ← tmux + ai-workspace
+│   │   ├── aws.zsh              ← AWS profile + bedrock aliases
 │   │   └── iterm2-integration.zsh
+│   ├── opencode/
+│   │   └── opencode.json         ← OpenCode config (Bedrock provider)
 │   ├── iterm2/
-│   └── dracula.json          ← Dynamic Profile
+│   │   └── dracula.json          ← Dynamic Profile
 │   ├── tmux/
 │   │   └── tmux.conf             ← tmux configuration
 │   └── git/
@@ -185,3 +198,4 @@ Type `exit` to return to your normal shell. The sandbox is deleted automatically
 
 - [Architecture](docs/architecture.md) — install/uninstall flows, zsh sourcing chain, diagrams
 - [Features](docs/features.md) — keybindings, customization, detailed feature docs
+- [AWS Bedrock Setup](docs/aws-bedrock-setup.md) — Bedrock authentication and OpenCode configuration

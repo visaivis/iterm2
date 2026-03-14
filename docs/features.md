@@ -137,6 +137,29 @@ Inside the TUI:
 - **/models** — switch AI model
 - **/share** — share conversation link
 
+## AWS Bedrock Provider
+
+OpenCode is pre-configured to use AWS Bedrock as its LLM provider via the `WFS-Architects-RD` AWS account. Authentication uses Microsoft Entra ID SSO — no API keys required.
+
+### Authentication commands
+
+| Command | Action |
+|---|---|
+| `bedrock-login` | Authenticate via Microsoft Entra ID SSO (opens browser) |
+| `bedrock-status` | Show current AWS identity and auth state |
+| `bedrock-logout` | Clear the SSO session |
+
+Shell environment variables set automatically by `config/zsh/aws.zsh`:
+- `AWS_PROFILE=WFS-Architects-RD`
+- `AWS_REGION=us-east-1`
+- `AWS_DEFAULT_REGION=us-east-1`
+
+### Default model
+
+**Claude Sonnet 4.5** (`anthropic.claude-sonnet-4-5-20250929-v1:0`) — set in `~/.config/opencode/opencode.json`. Use `/models` in the TUI to switch, or update the config file directly.
+
+See [docs/aws-bedrock-setup.md](aws-bedrock-setup.md) for the full setup guide, model recommendations, and troubleshooting.
+
 ## Customization
 
 ### Override aliases

@@ -30,7 +30,8 @@ flowchart TD
     Q --> R[Install TPM]
     R --> S[Add delta include to ~/.gitconfig]
     S --> T[Verify Powerlevel10k<br/>detect existing ~/.p10k.zsh]
-    T --> U[Print summary]
+    T --> U[Bootstrap AWS Bedrock<br/>~/.aws/config + ~/bin/bedrock-auth<br/>~/.config/opencode/opencode.json]
+    U --> V[Print summary]
 ```
 
 ## Uninstall Flow
@@ -58,32 +59,31 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[~/.zshrc] -->|"existing config<br/>(p10k, nvm, etc.)"| B[User's setup]
-    A -->|"source line<br/>(appended)"| C[~/.modern-terminal/init.zsh]
-    C --> D[plugins.zsh<br/>compinit, fzf-tab,<br/>autosuggestions,<br/>syntax-highlighting]
-    C --> E[fzf.zsh<br/>keybindings,<br/>theme colors]
-    C --> F[aliases.zsh<br/>eza, bat, fd,<br/>rg, zoxide]
+    A["~/.zshrc"] -->|"existing config<br/>(p10k, nvm, etc.)"| B["User's setup"]
+    A -->|"source line<br/>(appended)"| C["~/.modern-terminal/init.zsh"]
+    C --> D["plugins.zsh<br/>compinit, fzf-tab,<br/>autosuggestions,<br/>syntax-highlighting"]
+    C --> E["fzf.zsh<br/>keybindings,<br/>theme colors"]
+    C --> F["aliases.zsh<br/>eza, bat, fd,<br/>rg, zoxide"]
     C --> G0["init.zsh sources p10k<br/>(if not already loaded)"]
-    G0 --> G[p10k-overlay.zsh<br/>transient prompt,<br/>color overrides]
-    C --> H[tmux.zsh<br/>aliases,<br/>ai-workspace]
-    C --> I[iterm2-integration.zsh<br/>shell marks]
+    G0 --> G["p10k-overlay.zsh<br/>transient prompt,<br/>color overrides"]
+    C --> H["tmux.zsh<br/>aliases,<br/>ai-workspace"]
+    C --> J["aws.zsh<br/>AWS_PROFILE,<br/>bedrock aliases"]
+    C --> I["iterm2-integration.zsh<br/>shell marks"]
 ```
 
 ## tmux AI Workspace Layout
 
 ```mermaid
-graph LR
-    subgraph "tmux session: ai-dev"
-        subgraph "Left column"
+graph TB
+    subgraph session["tmux session: ai-dev"]
+        subgraph left["Left column"]
             A["Pane 0 (70%)<br/>coding / git"]
             B["Pane 1 (25%)<br/>test runner / logs"]
         end
-        subgraph "Right column"
+        subgraph right["Right column"]
             C["Pane 2 (30%)<br/>opencode AI TUI"]
         end
     end
-    A --- B
-    A --- C
 ```
 
 ## File System Layout
@@ -96,6 +96,9 @@ graph LR
 ~/.gitconfig                      ← [include] path added for delta
 ~/.iterm2_shell_integration.zsh   ← downloaded at install time
 ~/Library/Application Support/iTerm2/DynamicProfiles/dracula.json
+~/bin/bedrock-auth                ← AWS SSO auth helper (copied from scripts/bedrock-auth.sh)
+~/.aws/config                     ← WFS-Architects-RD profile + my-sso session (appended by installer)
+~/.config/opencode/opencode.json  ← OpenCode config (amazon-bedrock provider, us-east-1)
 
 ~/.terminal-config-backup/
   └── 20240101_120000/

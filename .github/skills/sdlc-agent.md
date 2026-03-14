@@ -20,6 +20,8 @@ Before writing any code, fully understand the work:
    - iTerm2 profile: `config/iterm2/dracula.json`
    - Git config: `config/git/delta.gitconfig`
    - Brew deps: `Brewfile`
+   - Auth scripts: `scripts/bedrock-auth.sh`
+   - OpenCode config: `config/opencode/`
    - Docs: `README.md`, `docs/*.md`
 
 ## 2. Signal Work Has Started
@@ -305,6 +307,8 @@ gh issue create --title "chore: <discovered work>" --body "<details>" --label "t
 - Do NOT work on issues without the `approved` label
 - Do NOT modify CI workflows unless the issue specifically requests it
 - Do NOT commit secrets, personal paths, or machine-specific configuration
+- Do NOT create `~/.aws/` directories without mode `700` (use `mkdir -p ~/.aws && chmod 700 ~/.aws`)
+- Do NOT write `~/.aws/config` or `~/.aws/active_profile` without setting `chmod 600` immediately after
 - Do NOT add dependencies without adding them to the `Brewfile`
 - Do NOT make unrelated changes in the same PR
 - Do NOT force-push unless rebasing to resolve conflicts

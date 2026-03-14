@@ -26,5 +26,8 @@ brew "zsh-completions"          # Additional completion definitions
 # AI coding assistant
 brew "opencode"
 
+# AWS CLI (for Bedrock provider authentication via SSO)
+brew "awscli"
+
 # Nerd Font (for icons in eza, p10k, etc.)
 cask "font-meslo-lg-nerd-font"

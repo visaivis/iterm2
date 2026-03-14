@@ -13,12 +13,15 @@ A reproducible, one-command setup for a modern iTerm2 + zsh terminal environment
 ├── uninstall.sh        # Manifest-based reversal of install
 ├── test.sh             # ZDOTDIR sandbox for isolated testing
 ├── Brewfile            # Homebrew dependencies
+├── scripts/
+│   └── bedrock-auth.sh  # AWS SSO auth helper (installed to ~/bin/bedrock-auth)
 ├── config/
 │   ├── iterm2/         # iTerm2 Dynamic Profile (JSON)
-│   ├── zsh/            # Modular zsh configs (init, plugins, aliases, fzf, tmux, p10k-overlay)
+│   ├── zsh/            # Modular zsh configs (init, plugins, aliases, fzf, tmux, aws, p10k-overlay)
+│   ├── opencode/       # OpenCode config (amazon-bedrock provider, Claude Sonnet 4.5 default)
 │   ├── tmux/           # tmux.conf with TPM plugin manager
 │   └── git/            # Delta diff configuration
-└── docs/               # Architecture diagrams, feature docs
+└── docs/               # Architecture diagrams, feature docs, aws-bedrock-setup
 ```
 
 ## Conventions
@@ -29,6 +32,15 @@ A reproducible, one-command setup for a modern iTerm2 + zsh terminal environment
 - **Backups**: The installer creates timestamped backups and a manifest file at `~/.modern-terminal-backup/`. The uninstaller reads this manifest to reverse changes.
 - **Conflict detection**: `install.sh` warns if existing `.zshrc` has competing config (duplicate PATH entries, conflicting plugins).
 - **Modularity**: Each zsh feature is a separate file in `config/zsh/`. Add new features by creating a new `.zsh` file and sourcing it from `init.zsh`.
+
+## Security Conventions
+
+- **`~/.aws/` directory**: Always created with `mkdir -p ~/.aws && chmod 700 ~/.aws` to prevent other users from reading SSO tokens or config.
+- **`~/.aws/config`**: Set `chmod 600 ~/.aws/config` immediately after any append or write. The file contains SSO profile details and must not be world-readable.
+- **`~/.aws/active_profile`**: Set `chmod 600` after writing. Used by `aws.zsh` to persist the selected profile across shells.
+- **Backup directory**: Created with `mkdir -m 700 -p` since it may contain copies of sensitive AWS config files.
+- **SSO access token**: Short-lived (8 hours), passed via environment variable to Python subprocesses — never written to disk or logged.
+- **Remote fetches**: `curl` downloads and `git clone --depth 1` do not verify checksums. Acceptable for developer tooling over HTTPS, but be aware of the supply-chain trust model.
 
 ## Testing
 
@@ -43,12 +55,24 @@ bash test.sh --install-deps
 bash install.sh --dry-run
 ```
 
+## AWS Bedrock Provider
+
+OpenCode is pre-configured to use `amazon-bedrock` as its LLM provider. The installer:
+- Copies `scripts/bedrock-auth.sh` to `~/bin/bedrock-auth` (executable)
+- Bootstraps `~/.aws/config` with the `WFS-Architects-RD` SSO profile (idempotent, appends only if missing)
+- Copies `config/opencode/opencode.json` to `~/.config/opencode/opencode.json`
+- Sources `config/zsh/aws.zsh` which sets `AWS_PROFILE`, `AWS_REGION`, and `bedrock-login/logout/status` aliases
+
+AWS account: `711387094947` | Role: `WFSPowerUserAccess` | SSO session: `my-sso` | Region: `us-east-1`
+
 ## Common Tasks
 
 - **Add a CLI tool**: Add to `Brewfile`, create alias in `config/zsh/aliases.zsh`, document in `docs/features.md`
 - **Modify theme colors**: Edit `config/iterm2/dracula.json` (ANSI color values are in the `Profiles[0]` object)
 - **Add tmux keybinding**: Edit `config/tmux/tmux.conf`
 - **Add zsh plugin**: Add to `config/zsh/plugins.zsh`, update `Brewfile` if it's a Homebrew plugin
+- **Change default AI model**: Edit `config/opencode/opencode.json` (`model` field); see `docs/aws-bedrock-setup.md` for Bedrock IDs
+- **Update Bedrock auth script**: Edit `scripts/bedrock-auth.sh`; re-run `./install.sh` to redeploy to `~/bin/bedrock-auth`
 
 ## CI Workflows
 
@@ -111,3 +135,56 @@ To install git hooks after cloning:
 ```bash
 bash .github/hooks/install.sh
 ```
+
+## Build, Lint, and Test Commands
+
+Run these locally before pushing (all run automatically in CI):
+
+```bash
+# ShellCheck - lint bash scripts (excludes config/zsh)
+shellcheck install.sh uninstall.sh test.sh
+
+# Zsh syntax check
+for f in config/zsh/*.zsh; do zsh -n "$f"; done
+
+# JSON validation
+python3 -m json.tool config/iterm2/dracula.json > /dev/null
+
+# Markdown lint
+markdownlint "**/*.md"
+
+# tmux config validation
+tmux -f config/tmux/tmux.conf start-server \; kill-server
+
+# Full sandbox test
+bash test.sh
+
+# Dry-run install
+bash install.sh --dry-run
+```
+
+## Code Style Guidelines
+
+### Bash/Zsh Scripts
+- **Shebang**: `#!/usr/bin/env bash` or `#!/bin/zsh`
+- **Error handling**: Always use `set -euo pipefail` at script top
+- **Variables**: Use `local` for function-scoped vars; uppercase for constants
+- **Functions**: Use `verb_noun()` naming (e.g., `backup_file`)
+- **Colors**: Define at top: `RED='\033[0;31m'`, `GREEN='\033[0;32m'`, etc.
+- **Logging**: Use helpers: `info()`, `ok()`, `warn()`, `err()`, `header()`
+- **Quotes**: Always quote variables: `"$file"` not `$file`
+- **Conditionals**: Use `[[ ]]` in zsh/bash
+
+### Zsh Config Files
+- **Sourcing**: Use `${0:A:h}` to get script directory
+- **Module order**: Document in comments (see `init.zsh`)
+- **Conditional loads**: Check file existence before sourcing
+
+### JSON Configuration
+- Validate with `python3 -m json.tool`
+- Use 2-space indentation
+
+### Git Commits
+- Format: `<type>(<scope>): <subject>` — e.g., `feat(zsh): add aws plugin`
+- Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
+- Include issue reference: `Closes #123`
