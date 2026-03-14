@@ -55,6 +55,7 @@ require_aws() {
 # Bootstrap ~/.aws/config with the SSO session + a default profile (idempotent)
 bootstrap_aws_config() {
   mkdir -p ~/.aws
+  chmod 700 ~/.aws
   if ! grep -q "\[sso-session ${SSO_SESSION}\]" ~/.aws/config 2>/dev/null; then
     {
       echo ""
@@ -63,6 +64,7 @@ bootstrap_aws_config() {
       echo "sso_region = ${AWS_REGION}"
       echo "sso_registration_scopes = sso:account:access"
     } >> ~/.aws/config
+    chmod 600 ~/.aws/config
     ok "Created SSO session '${SSO_SESSION}' in ~/.aws/config"
   fi
   if ! grep -q "\[profile ${AWS_PROFILE}\]" ~/.aws/config 2>/dev/null; then
@@ -74,6 +76,7 @@ bootstrap_aws_config() {
       echo "sso_role_name = WFSPowerUserAccess"
       echo "region = ${AWS_REGION}"
     } >> ~/.aws/config
+    chmod 600 ~/.aws/config
     ok "Created default profile '${AWS_PROFILE}' in ~/.aws/config"
   fi
 }
@@ -140,6 +143,7 @@ write_aws_profile() {
     echo "sso_role_name = ${role}"
     echo "region = ${AWS_REGION}"
   } >> ~/.aws/config
+  chmod 600 ~/.aws/config
   ok "Created profile '${profile}' in ~/.aws/config"
 }
 
@@ -147,6 +151,7 @@ write_aws_profile() {
 write_active_profile() {
   local profile="$1"
   echo "$profile" > "$ACTIVE_PROFILE_FILE"
+  chmod 600 "$ACTIVE_PROFILE_FILE"
   ok "Saved active profile: ${BOLD}${profile}${NC} → ~/.aws/active_profile"
 }
 

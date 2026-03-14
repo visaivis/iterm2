@@ -335,6 +335,7 @@ fi
 
 if ! $DRY_RUN; then
   mkdir -p "$BACKUP_DIR"
+  chmod 700 "$BACKUP_DIR"
   MANIFEST="$BACKUP_DIR/manifest.log"
   echo "# Modern Terminal Install Manifest - $TIMESTAMP" > "$MANIFEST"
   {
@@ -639,7 +640,9 @@ if ! $SKIP_OPENCODE; then
     else
       info "Would install: $OC_TUI_DEST (theme: dracula)"
     fi
-    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
+    if [[ -f "$OC_OPENCODE_DEST" ]]; then
+      info "Would backup existing $OC_OPENCODE_DEST and replace with server config"
+    else
       info "Would install: $OC_OPENCODE_DEST (base server config)"
     fi
   else
@@ -656,13 +659,10 @@ if ! $SKIP_OPENCODE; then
     log_action "COPY $OC_TUI_SRC $OC_TUI_DEST"
     ok "Installed OpenCode TUI config (theme: dracula): ~/.config/opencode/tui.json"
 
-    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
-      cp "$OC_OPENCODE_SRC" "$OC_OPENCODE_DEST"
-      log_action "COPY $OC_OPENCODE_SRC $OC_OPENCODE_DEST"
-      ok "Installed OpenCode server config: ~/.config/opencode/opencode.json"
-    else
-      ok "opencode.json already exists — skipping (add providers/models manually)"
-    fi
+    backup_file "$OC_OPENCODE_DEST"
+    cp "$OC_OPENCODE_SRC" "$OC_OPENCODE_DEST"
+    log_action "COPY $OC_OPENCODE_SRC $OC_OPENCODE_DEST"
+    ok "Installed OpenCode server config: ~/.config/opencode/opencode.json"
   fi
 fi
 
@@ -704,6 +704,7 @@ if ! $SKIP_BEDROCK; then
 
     # Bootstrap ~/.aws/config if SSO session entry is missing
     mkdir -p "$HOME/.aws"
+    chmod 700 "$HOME/.aws"
     if ! grep -q "\[sso-session ${SSO_SESSION_NAME}\]" "$AWS_CONFIG" 2>/dev/null; then
       cat >> "$AWS_CONFIG" <<AWSEOF
 
@@ -712,6 +713,7 @@ sso_start_url = https://wfscorp.awsapps.com/start
 sso_region = ${BEDROCK_REGION}
 sso_registration_scopes = sso:account:access
 AWSEOF
+      chmod 600 "$AWS_CONFIG"
       log_action "AWSCONFIG sso-session ${SSO_SESSION_NAME}"
       ok "Added SSO session '${SSO_SESSION_NAME}' to ~/.aws/config"
     else
@@ -728,6 +730,7 @@ sso_account_id = 711387094947
 sso_role_name = WFSPowerUserAccess
 region = ${BEDROCK_REGION}
 AWSEOF
+      chmod 600 "$AWS_CONFIG"
       log_action "AWSCONFIG profile ${BEDROCK_PROFILE}"
       ok "Added AWS profile '${BEDROCK_PROFILE}' to ~/.aws/config"
     else

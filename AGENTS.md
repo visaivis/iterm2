@@ -33,6 +33,15 @@ A reproducible, one-command setup for a modern iTerm2 + zsh terminal environment
 - **Conflict detection**: `install.sh` warns if existing `.zshrc` has competing config (duplicate PATH entries, conflicting plugins).
 - **Modularity**: Each zsh feature is a separate file in `config/zsh/`. Add new features by creating a new `.zsh` file and sourcing it from `init.zsh`.
 
+## Security Conventions
+
+- **`~/.aws/` directory**: Always created with `mkdir -p ~/.aws && chmod 700 ~/.aws` to prevent other users from reading SSO tokens or config.
+- **`~/.aws/config`**: Set `chmod 600 ~/.aws/config` immediately after any append or write. The file contains SSO profile details and must not be world-readable.
+- **`~/.aws/active_profile`**: Set `chmod 600` after writing. Used by `aws.zsh` to persist the selected profile across shells.
+- **Backup directory**: Created with `mkdir -m 700 -p` since it may contain copies of sensitive AWS config files.
+- **SSO access token**: Short-lived (8 hours), passed via environment variable to Python subprocesses — never written to disk or logged.
+- **Remote fetches**: `curl` downloads and `git clone --depth 1` do not verify checksums. Acceptable for developer tooling over HTTPS, but be aware of the supply-chain trust model.
+
 ## Testing
 
 ```bash
