@@ -494,6 +494,19 @@ if ! $SKIP_TMUX; then
   else
     ok "TPM already installed"
   fi
+
+  # Install TPM plugins (headless)
+  if [[ -x "$tpm_dir/bin/install_plugins" ]]; then
+    if $DRY_RUN; then
+      info "Would install tmux plugins via TPM"
+    else
+      "$tpm_dir/bin/install_plugins" >/dev/null 2>&1 || {
+        warn "Could not install tmux plugins. Run prefix + I inside tmux to install manually."
+      }
+      log_action "TPM_INSTALL_PLUGINS"
+      ok "Installed tmux plugins"
+    fi
+  fi
 fi
 
 # =============================================================================
@@ -540,6 +553,7 @@ if ! $SKIP_P10K; then
     log_action "P10K_FOUND $P10K_THEME"
 
     P10K_CONFIG="$HOME/.p10k.zsh"
+    P10K_DEFAULT="$SCRIPT_DIR/config/zsh/p10k-default.zsh"
     if [[ -f "$P10K_CONFIG" ]]; then
       ok "Existing p10k config found: ~/.p10k.zsh"
       if $DRY_RUN; then
@@ -552,10 +566,17 @@ if ! $SKIP_P10K; then
       fi
     else
       if $DRY_RUN; then
-        info "No ~/.p10k.zsh found. After install, run: ${BOLD}p10k configure${NC}"
+        info "No ~/.p10k.zsh found. Would install default config from repo."
       else
-        info "No ~/.p10k.zsh found."
-        info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
+        if [[ -f "$P10K_DEFAULT" ]]; then
+          cp "$P10K_DEFAULT" "$P10K_CONFIG"
+          log_action "COPY $P10K_DEFAULT $P10K_CONFIG"
+          ok "Installed default p10k config to ~/.p10k.zsh (nerdfont-v3 + MesloLGS NF)"
+          info "Customize later with: ${BOLD}p10k configure${NC}"
+        else
+          warn "Default p10k config not found at $P10K_DEFAULT"
+          info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
+        fi
       fi
     fi
   fi
@@ -582,8 +603,7 @@ else
   ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})${P10K_NEXT}
   ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Modern Dark${NC} profile:
      Settings → Profiles → select 'Modern Dark' → set as Default
-  ${BOLD}4.${NC} Install tmux plugins (inside tmux): press ${DIM}Ctrl+a I${NC}
-  ${BOLD}5.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
+  ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
 
   ${BOLD}Backups:${NC} $BACKUP_DIR
   ${BOLD}Manifest:${NC} $MANIFEST
