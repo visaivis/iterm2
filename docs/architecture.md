@@ -76,14 +76,10 @@ flowchart LR
 ```mermaid
 graph TB
     subgraph session["tmux session: ai-dev"]
-        subgraph left["Left column"]
-            A["Pane 0 (70%)<br/>coding / git"]
-            B["Pane 1 (25%)<br/>test runner / logs"]
-        end
-        subgraph right["Right column"]
-            C["Pane 2 (30%)<br/>opencode AI TUI"]
-        end
+        A["Pane 1 (85%)<br/>opencode AI TUI"]
+        B["Pane 2 (15%)<br/>terminal"]
     end
+    A --- B
 ```
 
 ## File System Layout
