@@ -167,7 +167,8 @@
       "Use Cursor Guide": false,
       "Minimum Contrast": 0.0,
       "Transparency": 0.0,
-      "Blur": false
+      "Blur": false,
+      "Copy to Clipboard on Selection": true
     }
   ]
 }
