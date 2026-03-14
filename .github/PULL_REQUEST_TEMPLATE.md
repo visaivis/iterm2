@@ -33,7 +33,7 @@ Closes #<!-- issue number -->
 - [ ] Updated `docs/architecture.md` if install/uninstall flow changed
 - [ ] Updated `docs/features.md` if feature behavior changed
 - [ ] Updated `AGENTS.md` if project structure or conventions changed
-- [ ] Updated `.github/skills/sdlc-agent.md` if workflow or file scope changed
+- [ ] Updated `.agents/skills/sdlc-agent/SKILL.md` if workflow or file scope changed
 - [ ] N/A — no documentation changes needed (explain why)
 
 ## Checklist
