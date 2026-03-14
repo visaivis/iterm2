@@ -26,7 +26,7 @@ Thanks for your interest in contributing! Here's how to get started.
 ## What to Contribute
 
 - New CLI tool integrations (add to `Brewfile` + alias in `config/zsh/aliases.zsh`)
-- Theme improvements (`config/iterm2/modern-dark.json`)
+- Theme improvements (`config/iterm2/dracula.json`)
 - Tmux layout presets
 - Documentation improvements
 - Bug fixes in install/uninstall scripts

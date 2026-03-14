@@ -307,7 +307,7 @@ header "Installation Plan"
 
 echo -e "  The following changes will be made:\n"
 $SKIP_BREW   || echo -e "  ${GREEN}▸${NC} Install CLI tools via Homebrew (Brewfile)"
-$SKIP_ITERM  || echo -e "  ${GREEN}▸${NC} Add iTerm2 Dynamic Profile: ${DIM}Modern Dark${NC}"
+$SKIP_ITERM  || echo -e "  ${GREEN}▸${NC} Add iTerm2 Dynamic Profile: ${DIM}Dracula${NC}"
 $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Symlink zsh config: ${DIM}$CONFIG_DIR → $SCRIPT_DIR/config/zsh${NC}"
 $SKIP_ZSH    || echo -e "  ${GREEN}▸${NC} Append source line to: ${DIM}$ZSHRC${NC}"
 $SKIP_TMUX   || echo -e "  ${GREEN}▸${NC} Symlink tmux config: ${DIM}~/.tmux.conf → $SCRIPT_DIR/config/tmux/tmux.conf${NC}"
@@ -360,15 +360,15 @@ fi
 
 if ! $SKIP_ITERM; then
   header "Installing iTerm2 Dynamic Profile"
-  profile_dest="$ITERM_PROFILES_DIR/modern-dark.json"
+  profile_dest="$ITERM_PROFILES_DIR/dracula.json"
   if $DRY_RUN; then
-    info "Would copy: $SCRIPT_DIR/config/iterm2/modern-dark.json → $profile_dest"
+    info "Would copy: $SCRIPT_DIR/config/iterm2/dracula.json → $profile_dest"
   else
     backup_file "$profile_dest"
     mkdir -p "$ITERM_PROFILES_DIR"
-    cp "$SCRIPT_DIR/config/iterm2/modern-dark.json" "$profile_dest"
-    log_action "COPY $SCRIPT_DIR/config/iterm2/modern-dark.json $profile_dest"
-    ok "Dynamic Profile installed (select 'Modern Dark' in iTerm2 → Profiles)"
+    cp "$SCRIPT_DIR/config/iterm2/dracula.json" "$profile_dest"
+    log_action "COPY $SCRIPT_DIR/config/iterm2/dracula.json $profile_dest"
+    ok "Dynamic Profile installed (select 'Dracula' in iTerm2 → Profiles)"
   fi
 fi
 
@@ -494,6 +494,19 @@ if ! $SKIP_TMUX; then
   else
     ok "TPM already installed"
   fi
+
+  # Install TPM plugins (headless)
+  if [[ -x "$tpm_dir/bin/install_plugins" ]]; then
+    if $DRY_RUN; then
+      info "Would install tmux plugins via TPM"
+    else
+      "$tpm_dir/bin/install_plugins" >/dev/null 2>&1 || {
+        warn "Could not install tmux plugins. Run prefix + I inside tmux to install manually."
+      }
+      log_action "TPM_INSTALL_PLUGINS"
+      ok "Installed tmux plugins"
+    fi
+  fi
 fi
 
 # =============================================================================
@@ -540,6 +553,7 @@ if ! $SKIP_P10K; then
     log_action "P10K_FOUND $P10K_THEME"
 
     P10K_CONFIG="$HOME/.p10k.zsh"
+    P10K_DEFAULT="$SCRIPT_DIR/config/zsh/p10k-default.zsh"
     if [[ -f "$P10K_CONFIG" ]]; then
       ok "Existing p10k config found: ~/.p10k.zsh"
       if $DRY_RUN; then
@@ -552,10 +566,17 @@ if ! $SKIP_P10K; then
       fi
     else
       if $DRY_RUN; then
-        info "No ~/.p10k.zsh found. After install, run: ${BOLD}p10k configure${NC}"
+        info "No ~/.p10k.zsh found. Would install default config from repo."
       else
-        info "No ~/.p10k.zsh found."
-        info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
+        if [[ -f "$P10K_DEFAULT" ]]; then
+          cp "$P10K_DEFAULT" "$P10K_CONFIG"
+          log_action "COPY $P10K_DEFAULT $P10K_CONFIG"
+          ok "Installed default p10k config to ~/.p10k.zsh (nerdfont-v3 + MesloLGS NF)"
+          info "Customize later with: ${BOLD}p10k configure${NC}"
+        else
+          warn "Default p10k config not found at $P10K_DEFAULT"
+          info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
+        fi
       fi
     fi
   fi
@@ -580,10 +601,9 @@ else
   ${GREEN}${BOLD}What's next:${NC}
 
   ${BOLD}1.${NC} Restart your terminal (or run: ${DIM}source ~/.zshrc${NC})${P10K_NEXT}
-  ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Modern Dark${NC} profile:
-     Settings → Profiles → select 'Modern Dark' → set as Default
-  ${BOLD}4.${NC} Install tmux plugins (inside tmux): press ${DIM}Ctrl+a I${NC}
-  ${BOLD}5.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
+  ${BOLD}3.${NC} In iTerm2, switch to the ${DIM}Dracula${NC} profile:
+     Settings → Profiles → select 'Dracula' → set as Default
+  ${BOLD}4.${NC} Try the AI workspace: ${DIM}ai-workspace${NC}
 
   ${BOLD}Backups:${NC} $BACKUP_DIR
   ${BOLD}Manifest:${NC} $MANIFEST

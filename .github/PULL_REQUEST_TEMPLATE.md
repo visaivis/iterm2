@@ -22,7 +22,7 @@ Closes #<!-- issue number -->
 
 - [ ] ShellCheck passes on modified `.sh` files
 - [ ] `zsh -n` passes on modified `.zsh` files
-- [ ] JSON validates for `modern-dark.json` (if modified)
+- [ ] JSON validates for `dracula.json` (if modified)
 - [ ] `bash install.sh --dry-run` succeeds
 - [ ] `bash test.sh` passes in sandbox
 

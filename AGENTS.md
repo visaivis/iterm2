@@ -46,7 +46,7 @@ bash install.sh --dry-run
 ## Common Tasks
 
 - **Add a CLI tool**: Add to `Brewfile`, create alias in `config/zsh/aliases.zsh`, document in `docs/features.md`
-- **Modify theme colors**: Edit `config/iterm2/modern-dark.json` (ANSI color values are in the `Profiles[0]` object)
+- **Modify theme colors**: Edit `config/iterm2/dracula.json` (ANSI color values are in the `Profiles[0]` object)
 - **Add tmux keybinding**: Edit `config/tmux/tmux.conf`
 - **Add zsh plugin**: Add to `config/zsh/plugins.zsh`, update `Brewfile` if it's a Homebrew plugin
 

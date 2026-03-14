@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Replace custom "Modern Dark" iTerm2 color scheme with the official [Dracula](https://draculatheme.com) theme (#16)
+- Rename iTerm2 Dynamic Profile from `modern-dark.json` to `dracula.json`
+- Profile name changed from "Modern Dark" to "Dracula" in installer, uninstaller, and sandbox test
+
 ## [1.2.2] - 2026-03-14
 
 ### Fixed
