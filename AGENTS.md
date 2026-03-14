@@ -110,9 +110,9 @@ This project is agentic-first. Issues flow through a label-based lifecycle manag
 triage → approved → in-progress → pr-submitted → (closed)
 ```
 
-**Before working on any issue**, read the SDLC skill:
-- `.github/skills/sdlc-agent.md` — Full issue-to-PR workflow (branch naming, commit conventions, validation gates, PR standards)
-- `.github/ISSUE_LIFECYCLE.md` — Label definitions and state transitions
+**Before working on any issue**, read the SDLC skills:
+- `.agents/skills/sdlc-agent/SKILL.md` — Full issue-to-PR workflow (branch naming, commit conventions, validation gates, PR standards)
+- `.agents/skills/issue-lifecycle/SKILL.md` — Label definitions and state transitions
 
 Key rules:
 - **NEVER approve your own issues** — moving an issue from `triage` to `approved` is exclusively a human action. The agent must not apply the `approved` label under any circumstance.
