@@ -72,7 +72,7 @@ done
 
 if $INSTALL_DEPS; then
   header "Installing Homebrew dependencies"
-  brew bundle --file="$SCRIPT_DIR/Brewfile" --no-lock || {
+  brew bundle --file="$SCRIPT_DIR/Brewfile" || {
     warn "Some packages may have failed to install"
   }
   ok "Dependencies installed"
