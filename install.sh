@@ -578,34 +578,47 @@ header "Setting up Powerlevel10k"
 if ! $SKIP_OPENCODE; then
   header "Configuring OpenCode theme (Dracula)"
 
-  OC_THEMES_DIR="$HOME/.config/opencode/themes"
-  OC_CONFIG="$HOME/.config/opencode/config.json"
+  OC_CONFIG_DIR="$HOME/.config/opencode"
+  OC_THEMES_DIR="$OC_CONFIG_DIR/themes"
   OC_THEME_SRC="$SCRIPT_DIR/config/opencode/themes/dracula.json"
   OC_THEME_DEST="$OC_THEMES_DIR/dracula.json"
-  OC_CONFIG_SRC="$SCRIPT_DIR/config/opencode/config.json"
+  OC_TUI_SRC="$SCRIPT_DIR/config/opencode/tui.json"
+  OC_TUI_DEST="$OC_CONFIG_DIR/tui.json"
+  OC_OPENCODE_SRC="$SCRIPT_DIR/config/opencode/opencode.json"
+  OC_OPENCODE_DEST="$OC_CONFIG_DIR/opencode.json"
 
   if $DRY_RUN; then
     info "Would create: $OC_THEMES_DIR"
     info "Would symlink: $OC_THEME_DEST → $OC_THEME_SRC"
-    if [[ -f "$OC_CONFIG" ]]; then
-      info "Would backup existing $OC_CONFIG and replace with Dracula config"
+    if [[ -f "$OC_TUI_DEST" ]]; then
+      info "Would backup existing $OC_TUI_DEST and replace with Dracula tui.json"
     else
-      info "Would install: $OC_CONFIG (theme: dracula)"
+      info "Would install: $OC_TUI_DEST (theme: dracula)"
+    fi
+    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
+      info "Would install: $OC_OPENCODE_DEST (base server config)"
     fi
   else
     mkdir -p "$OC_THEMES_DIR"
     log_action "MKDIR $OC_THEMES_DIR"
 
     backup_file "$OC_THEME_DEST"
-    rm -f "$OC_THEME_DEST"
-    ln -sf "$OC_THEME_SRC" "$OC_THEME_DEST"
-    log_action "SYMLINK $OC_THEME_DEST $OC_THEME_SRC"
-    ok "Symlinked: ~/.config/opencode/themes/dracula.json"
+    cp "$OC_THEME_SRC" "$OC_THEME_DEST"
+    log_action "COPY $OC_THEME_DEST $OC_THEME_SRC"
+    ok "Installed: ~/.config/opencode/themes/dracula.json"
 
-    backup_file "$OC_CONFIG"
-    cp "$OC_CONFIG_SRC" "$OC_CONFIG"
-    log_action "COPY $OC_CONFIG_SRC $OC_CONFIG"
-    ok "Installed OpenCode config (theme: dracula): ~/.config/opencode/config.json"
+    backup_file "$OC_TUI_DEST"
+    cp "$OC_TUI_SRC" "$OC_TUI_DEST"
+    log_action "COPY $OC_TUI_SRC $OC_TUI_DEST"
+    ok "Installed OpenCode TUI config (theme: dracula): ~/.config/opencode/tui.json"
+
+    if [[ ! -f "$OC_OPENCODE_DEST" ]]; then
+      cp "$OC_OPENCODE_SRC" "$OC_OPENCODE_DEST"
+      log_action "COPY $OC_OPENCODE_SRC $OC_OPENCODE_DEST"
+      ok "Installed OpenCode server config: ~/.config/opencode/opencode.json"
+    else
+      ok "opencode.json already exists — skipping (add providers/models manually)"
+    fi
   fi
 fi
 
