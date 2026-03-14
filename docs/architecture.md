@@ -30,7 +30,8 @@ flowchart TD
     Q --> R[Install TPM]
     R --> S[Add delta include to ~/.gitconfig]
     S --> T[Verify Powerlevel10k<br/>detect existing ~/.p10k.zsh]
-    T --> U[Print summary]
+    T --> U[Bootstrap AWS Bedrock<br/>~/.aws/config + ~/bin/bedrock-auth<br/>~/.config/opencode/opencode.json]
+    U --> V[Print summary]
 ```
 
 ## Uninstall Flow
@@ -66,6 +67,7 @@ flowchart LR
     C --> G0["init.zsh sources p10k<br/>(if not already loaded)"]
     G0 --> G[p10k-overlay.zsh<br/>transient prompt,<br/>color overrides]
     C --> H[tmux.zsh<br/>aliases,<br/>ai-workspace]
+    C --> J[aws.zsh<br/>AWS_PROFILE,<br/>bedrock aliases]
     C --> I[iterm2-integration.zsh<br/>shell marks]
 ```
 
@@ -96,6 +98,9 @@ graph LR
 ~/.gitconfig                      ← [include] path added for delta
 ~/.iterm2_shell_integration.zsh   ← downloaded at install time
 ~/Library/Application Support/iTerm2/DynamicProfiles/dracula.json
+~/bin/bedrock-auth                ← AWS SSO auth helper (copied from scripts/bedrock-auth.sh)
+~/.aws/config                     ← WFS-Architects-RD profile + my-sso session (appended by installer)
+~/.config/opencode/opencode.json  ← OpenCode config (amazon-bedrock provider, us-east-1)
 
 ~/.terminal-config-backup/
   └── 20240101_120000/
