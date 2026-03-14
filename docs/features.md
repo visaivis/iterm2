@@ -88,17 +88,17 @@ Use `tmux -CC` (or the `tcc` alias) for native integration — tmux windows beco
 
 ### AI Workspace
 
-Run `ai-workspace` to create a 3-pane tmux session:
+Run `ai-workspace` to create a 2-pane tmux session optimised for AI-assisted development:
 
 ```
-┌──────────────────┬─────────────┐
-│                  │             │
-│   coding/git     │  opencode   │
-│   (main pane)    │  AI TUI     │
-│                  │             │
-├──────────────────┤             │
-│  test/logs       │             │
-└──────────────────┴─────────────┘
+┌─────────────────────────────────┐
+│                                 │
+│         opencode AI TUI         │
+│            (85%)                │
+│                                 │
+├─────────────────────────────────┤
+│        terminal (15%)           │
+└─────────────────────────────────┘
 ```
 
 Usage:
@@ -107,6 +107,8 @@ ai-workspace              # Default session name: ai-dev
 ai-workspace myproject    # Custom session name
 ai-workspace proj /path   # Custom name + directory
 ```
+
+If the session already exists, you'll be prompted to recreate or attach. Use `ai-layout-fix` (alias `tfix`) from inside tmux to reset an existing session to the standard layout.
 
 ## Modern CLI Replacements
 

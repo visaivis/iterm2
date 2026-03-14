@@ -23,21 +23,30 @@ ai-workspace() {
   local session_name="${1:-ai-dev}"
   local project_dir="${2:-$(pwd)}"
 
-  # If session exists, kill it and recreate with the correct layout
+  # Prevent nested tmux — use ai-layout-fix instead
+  if [[ -n "$TMUX" ]]; then
+    echo "Already inside tmux. Use 'ai-layout-fix' to adjust the current session."
+    return 1
+  fi
+
+  # If session exists, confirm before destroying it
   if tmux has-session -t "$session_name" 2>/dev/null; then
+    printf "Session '%s' already exists. Recreate? [y/N] " "$session_name"
+    read -r reply
+    if [[ "$reply" != [yY] ]]; then
+      echo "Attaching to existing session instead."
+      tmux attach-session -t "$session_name"
+      return
+    fi
     tmux kill-session -t "$session_name"
   fi
 
   echo "Creating AI workspace: $session_name (in $project_dir)"
 
-  # Create session with a plain shell first, then split — opencode starts last
-  # so its terminal capability queries don't leak into the bottom pane's stdin.
+  # Create session, split, then launch opencode in the top pane
   tmux new-session -d -s "$session_name" -c "$project_dir"
-
-  # Split bottom for terminal (15% height)
   tmux split-window -v -p 15 -t "$session_name" -c "$project_dir"
 
-  # Start opencode in the top pane now that both panes exist
   if command -v opencode &>/dev/null; then
     tmux send-keys -t "$session_name:.1" 'opencode' Enter
   fi
@@ -57,6 +66,12 @@ ai-workspace() {
 #   │         terminal (15%)         │
 #   └────────────────────────────────┘
 ai-layout-fix() {
+  # Require either a session name argument or being inside tmux
+  if [[ -z "$TMUX" ]] && [[ -z "$1" ]]; then
+    echo "Not inside tmux. Pass a session name: ai-layout-fix <session>"
+    return 1
+  fi
+
   local session="${1:-$(tmux display-message -p '#S')}"
 
   if ! tmux has-session -t "$session" 2>/dev/null; then

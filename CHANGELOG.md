@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Resolve iTerm2 escape sequence leakage (`1016;4$y...`) in `ai-workspace` by disabling unused tmux passthrough (#43)
+- Increase tmux `escape-time` from 0 to 10ms to prevent misparsing of multi-byte escape sequences (#43)
+
+### Changed
+
+- `ai-workspace` now prompts for confirmation before killing an existing session (#43)
+- `ai-workspace` refuses to run inside tmux (prevents nested sessions); suggests `ai-layout-fix` instead (#43)
+- `ai-layout-fix` gives a clear error when called outside tmux without a session name (#43)
+
+### Removed
+
+- Dead `terminal-features` overrides with invalid syntax in `tmux.conf` (#43)
+- Redundant `terminal-overrides` entry for `xterm-256color` (already matched by `*256col*` glob) (#43)
+- Dead copy-mode `y` and `MouseDragEnd1Pane` bindings (handled by `tmux-yank` plugin) (#43)
+- `sleep` and `clear` timing hacks from `ai-workspace` (no longer needed with passthrough disabled) (#43)
+
+### Docs
+
+- Update `docs/features.md` AI Workspace section to show actual 2-pane layout (was stale 3-pane) (#43)
+- Update `docs/architecture.md` mermaid diagram to match 2-pane layout (#43)
+
 ## [1.3.0] - 2026-03-14
 
 ### Changed
