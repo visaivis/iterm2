@@ -24,7 +24,7 @@ brew "zsh-autosuggestions"      # Ghost-text completions from history
 brew "zsh-completions"          # Additional completion definitions
 
 # AI coding assistant
-brew "anomalyco/tap/opencode"
+brew "opencode"
 
 # Nerd Font (for icons in eza, p10k, etc.)
 cask "font-meslo-lg-nerd-font"
