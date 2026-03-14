@@ -9,5 +9,20 @@
         "profile": "WFS-Architects-RD"
       }
     }
+  },
+  "keybinds": {
+    "leader": "alt+x",
+    "session_new": "<leader>n",
+    "session_list": "<leader>l",
+    "session_interrupt": "escape",
+    "session_compact": "<leader>c",
+    "sidebar_toggle": "<leader>b",
+    "status_view": "<leader>s",
+    "editor_open": "<leader>e",
+    "theme_list": "<leader>t",
+    "messages_page_up": "pageup,alt+b",
+    "messages_page_down": "pagedown,alt+f",
+    "messages_half_page_up": "alt+u",
+    "messages_half_page_down": "alt+d"
   }
 }
