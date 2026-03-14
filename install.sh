@@ -38,6 +38,7 @@ SKIP_TMUX=false
 SKIP_GIT=false
 SKIP_PLUGINS=false
 SKIP_ALIASES=false
+SKIP_OPENCODE=false
 
 # =============================================================================
 # Helpers
@@ -99,6 +100,7 @@ ${BOLD}Options:${NC}
   --skip-git        Skip git/delta configuration
   --skip-plugins    Skip zsh plugin loading (use existing plugins)
   --skip-aliases    Skip modern CLI aliases (keep existing aliases)
+  --skip-opencode   Skip OpenCode theme configuration
   -h, --help        Show this help message
 
 ${BOLD}What it does:${NC}
@@ -136,6 +138,7 @@ while [[ $# -gt 0 ]]; do
     --skip-git)       SKIP_GIT=true ;;
     --skip-plugins)   SKIP_PLUGINS=true ;;
     --skip-aliases)   SKIP_ALIASES=true ;;
+    --skip-opencode)  SKIP_OPENCODE=true ;;
     -h|--help)        usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
@@ -567,6 +570,44 @@ header "Setting up Powerlevel10k"
       info "Run ${BOLD}p10k configure${NC} to set up your prompt style."
     fi
   fi
+
+# =============================================================================
+# 7. OpenCode Theme Configuration
+# =============================================================================
+
+if ! $SKIP_OPENCODE; then
+  header "Configuring OpenCode theme (Dracula)"
+
+  OC_THEMES_DIR="$HOME/.config/opencode/themes"
+  OC_CONFIG="$HOME/.config/opencode/config.json"
+  OC_THEME_SRC="$SCRIPT_DIR/config/opencode/themes/dracula.json"
+  OC_THEME_DEST="$OC_THEMES_DIR/dracula.json"
+  OC_CONFIG_SRC="$SCRIPT_DIR/config/opencode/config.json"
+
+  if $DRY_RUN; then
+    info "Would create: $OC_THEMES_DIR"
+    info "Would symlink: $OC_THEME_DEST → $OC_THEME_SRC"
+    if [[ -f "$OC_CONFIG" ]]; then
+      info "Would backup existing $OC_CONFIG and replace with Dracula config"
+    else
+      info "Would install: $OC_CONFIG (theme: dracula)"
+    fi
+  else
+    mkdir -p "$OC_THEMES_DIR"
+    log_action "MKDIR $OC_THEMES_DIR"
+
+    backup_file "$OC_THEME_DEST"
+    rm -f "$OC_THEME_DEST"
+    ln -sf "$OC_THEME_SRC" "$OC_THEME_DEST"
+    log_action "SYMLINK $OC_THEME_DEST $OC_THEME_SRC"
+    ok "Symlinked: ~/.config/opencode/themes/dracula.json"
+
+    backup_file "$OC_CONFIG"
+    cp "$OC_CONFIG_SRC" "$OC_CONFIG"
+    log_action "COPY $OC_CONFIG_SRC $OC_CONFIG"
+    ok "Installed OpenCode config (theme: dracula): ~/.config/opencode/config.json"
+  fi
+fi
 
 # =============================================================================
 # Summary
