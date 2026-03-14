@@ -30,15 +30,17 @@ ai-workspace() {
 
   echo "Creating AI workspace: $session_name (in $project_dir)"
 
-  # Create session — top pane runs opencode directly
-  if command -v opencode &>/dev/null; then
-    tmux new-session -d -s "$session_name" -c "$project_dir" 'opencode'
-  else
-    tmux new-session -d -s "$session_name" -c "$project_dir"
-  fi
+  # Create session with a plain shell first, then split — opencode starts last
+  # so its terminal capability queries don't leak into the bottom pane's stdin.
+  tmux new-session -d -s "$session_name" -c "$project_dir"
 
   # Split bottom for terminal (15% height)
   tmux split-window -v -p 15 -t "$session_name" -c "$project_dir"
+
+  # Start opencode in the top pane now that both panes exist
+  if command -v opencode &>/dev/null; then
+    tmux send-keys -t "$session_name:.1" 'opencode' Enter
+  fi
 
   # Focus the bottom terminal pane (pane-base-index is 1, so .2 is bottom)
   tmux select-pane -t "$session_name:.2"
