@@ -6,11 +6,10 @@
 # Only apply if p10k is loaded
 if (( ${+functions[powerlevel10k]} )) || [[ -n "$POWERLEVEL9K_LEFT_PROMPT_ELEMENTS" ]]; then
 
-  # --- Native iTerm2 integration ---
-  # Replaces the standalone ~/.iterm2_shell_integration.zsh script.
-  # Provides command marks, captured output, and profile switching without
-  # injecting a visible '>' caret before the prompt.
-  typeset -g POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
+  # iTerm2 shell integration disabled to prevent mark indicators (arrows)
+  # appearing in the left gutter on every prompt line.
+  # Re-enable by setting POWERLEVEL9K_TERM_SHELL_INTEGRATION=true
+  typeset -g POWERLEVEL9K_TERM_SHELL_INTEGRATION=false
 
   # --- Transient prompt ---
   # Collapses accepted commands to a minimal one-line prompt, keeping the
