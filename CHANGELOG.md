@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-14
+
 ### Changed
 
 - Replace custom "Modern Dark" iTerm2 color scheme with the official [Dracula](https://draculatheme.com) theme (#16)
