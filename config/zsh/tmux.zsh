@@ -40,8 +40,8 @@ ai-workspace() {
   # Split bottom for terminal (15% height)
   tmux split-window -v -p 15 -t "$session_name" -c "$project_dir"
 
-  # Focus the bottom terminal pane
-  tmux select-pane -t "$session_name:.1"
+  # Focus the bottom terminal pane (pane-base-index is 1, so .2 is bottom)
+  tmux select-pane -t "$session_name:.2"
 
   # Attach
   tmux attach-session -t "$session_name"
@@ -70,8 +70,7 @@ ai-layout-fix() {
     tmux split-window -v -p 15 -t "$session" -c "#{pane_current_path}"
   fi
 
-  # Apply vertical layout with 85/15 split
-  tmux select-layout -t "$session" main-horizontal
+  # Resize bottom pane to 15% (pane-base-index is 1, so .2 is bottom)
   tmux resize-pane -t "$session:.2" -y 15%
   tmux select-pane -t "$session:.2"
 
