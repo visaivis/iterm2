@@ -603,10 +603,9 @@ if ! $SKIP_OPENCODE; then
     log_action "MKDIR $OC_THEMES_DIR"
 
     backup_file "$OC_THEME_DEST"
-    rm -f "$OC_THEME_DEST"
-    ln -sf "$OC_THEME_SRC" "$OC_THEME_DEST"
-    log_action "SYMLINK $OC_THEME_DEST $OC_THEME_SRC"
-    ok "Symlinked: ~/.config/opencode/themes/dracula.json"
+    cp "$OC_THEME_SRC" "$OC_THEME_DEST"
+    log_action "COPY $OC_THEME_DEST $OC_THEME_SRC"
+    ok "Installed: ~/.config/opencode/themes/dracula.json"
 
     backup_file "$OC_TUI_DEST"
     cp "$OC_TUI_SRC" "$OC_TUI_DEST"
